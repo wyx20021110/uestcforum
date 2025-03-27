@@ -17,19 +17,15 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from django.conf import settings
-from whitenoise.middleware import WhiteNoiseMiddleware
 
 # 最后导入应用特定的路由
 import chat.routing
 
-# WhiteNoise ASGI应用配置
-from whitenoise import WhiteNoise
+# 注意不要在ASGI环境中直接使用WhiteNoise
+# 获取标准Django ASGI应用
 http_application = get_asgi_application()
-http_application = WhiteNoise(http_application)
-http_application.add_files(os.path.join(settings.BASE_DIR, 'staticfiles'), prefix='static/')
-http_application.add_files(settings.MEDIA_ROOT, prefix='media/')
 
+# ProtocolTypeRouter分派不同类型的连接
 application = ProtocolTypeRouter({
     "http": http_application,
     "websocket": AllowedHostsOriginValidator(
