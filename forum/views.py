@@ -13,6 +13,7 @@ from .forms import PostForm, CommentForm
 import logging
 import json
 import traceback
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -278,13 +279,123 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @require_POST
 def attachment_delete(request, pk):
     """删除附件视图"""
-    attachment = get_object_or_404(Attachment, pk=pk)
-    post = attachment.post
-    
-    if request.user == post.author or request.user.is_staff:
-        attachment.delete()
-        messages.success(request, '附件删除成功！')
-    else:
-        messages.error(request, '您没有权限删除此附件！')
-    
-    return redirect('forum:post_edit', pk=post.pk) 
+    try:
+        # 记录请求信息
+        logger.info(f"收到附件删除请求: pk={pk}, 用户={request.user.username}, 方法={request.method}")
+        logger.info(f"请求头: {dict(request.headers)}")
+        logger.info(f"POST数据: {dict(request.POST)}")
+        
+        # 获取附件对象
+        attachment = get_object_or_404(Attachment, pk=pk)
+        post = attachment.post
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
+        # 检查权限
+        if request.user == post.author or request.user.is_staff:
+            # 记录将要删除的文件信息
+            file_name = attachment.filename
+            file_url = attachment.file.url if attachment.file else "URL不存在"
+            file_path = attachment.file.path if attachment.file else "路径不存在"
+            storage = attachment.file.storage  # 获取存储后端
+            
+            logger.info(f"请求删除附件: ID={pk}, 文件名={file_name}, URL={file_url}, 路径={file_path}")
+            
+            # 保存文件路径以便后续删除
+            file_name_to_delete = attachment.file.name  # 这是相对路径
+            
+            try:
+                # 首先尝试通过storage API删除文件
+                if attachment.file:
+                    # 确保文件存在
+                    if storage.exists(file_name_to_delete):
+                        logger.info(f"开始删除文件: {file_name_to_delete}")
+                        # 关闭文件句柄
+                        if hasattr(attachment.file, 'close'):
+                            attachment.file.close()
+                        
+                        # 使用storage API删除文件
+                        storage.delete(file_name_to_delete)
+                        logger.info(f"使用storage API删除文件成功: {file_name_to_delete}")
+                    else:
+                        logger.warning(f"文件不存在于storage中: {file_name_to_delete}")
+                        
+                    # 再次尝试手动删除物理文件（备用方法）
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        logger.info(f"使用os.remove删除物理文件成功: {file_path}")
+                    else:
+                        logger.warning(f"物理文件不存在: {file_path}")
+            except Exception as file_delete_error:
+                logger.error(f"删除物理文件失败: {str(file_delete_error)}")
+                # 记录异常堆栈跟踪
+                logger.error(traceback.format_exc())
+            
+            # 从数据库中删除记录
+            attachment_id = attachment.id
+            logger.info(f"开始删除数据库记录: ID={attachment_id}")
+            attachment.delete()
+            logger.info(f"数据库记录删除完成")
+            
+            # 验证删除是否成功
+            deleted_success = not Attachment.objects.filter(id=attachment_id).exists()
+            
+            # 检查文件是否还存在
+            file_still_exists = False
+            if file_name_to_delete:
+                file_still_exists = storage.exists(file_name_to_delete)
+            
+            # 记录详细结果
+            result_info = {
+                "db_delete_success": deleted_success,
+                "file_still_exists": file_still_exists,
+                "file_path": file_path,
+                "file_name": file_name_to_delete
+            }
+            logger.info(f"删除操作结果: {result_info}")
+            
+            if deleted_success:
+                # 返回成功消息
+                success_msg = f'文件"{file_name}"删除成功！'
+                if is_ajax:
+                    return JsonResponse({
+                        'status': 'success', 
+                        'message': success_msg,
+                        'debug_info': result_info
+                    })
+                else:
+                    messages.success(request, success_msg)
+                logger.info(f"附件删除过程完成: {file_name}")
+            else:
+                error_msg = f'文件"{file_name}"删除数据库记录失败！'
+                if is_ajax:
+                    return JsonResponse({
+                        'status': 'error', 
+                        'message': error_msg,
+                        'debug_info': result_info
+                    }, status=500)
+                else:
+                    messages.error(request, error_msg)
+                logger.error(f"附件记录删除失败: {file_name}")
+        else:
+            error_msg = '您没有权限删除此附件！'
+            logger.warning(f"用户 {request.user.username} 尝试删除没有权限的附件 {pk}")
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'message': error_msg}, status=403)
+            else:
+                messages.error(request, error_msg)
+        
+        # 非AJAX请求时重定向回帖子编辑页面
+        if not is_ajax:
+            return redirect('forum:post_edit', pk=post.pk)
+        return JsonResponse({'status': 'success'})
+        
+    except Exception as e:
+        error_msg = f'删除附件时出错: {str(e)}'
+        logger.error(error_msg)
+        logger.error(traceback.format_exc())
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': error_msg}, status=500)
+        else:
+            messages.error(request, error_msg)
+            return redirect('forum:post_list') 

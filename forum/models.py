@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+import logging
+import os
 
 User = get_user_model()
 
@@ -71,6 +73,45 @@ class Attachment(models.Model):
     
     def __str__(self):
         return self.filename
+        
+    def delete(self, *args, **kwargs):
+        """重写删除方法，确保物理文件也被删除"""
+        logger = logging.getLogger(__name__)
+        
+        # 记录删除信息
+        logger.info(f"执行Attachment模型的自定义delete方法: file={self.file.name}")
+        
+        # 获取文件存储实例
+        storage = self.file.storage
+        
+        # 保存文件名以便后续删除
+        file_name = self.file.name
+        
+        # 先尝试关闭文件
+        try:
+            if hasattr(self.file, 'close'):
+                self.file.close()
+        except Exception as e:
+            logger.error(f"关闭文件句柄失败: {str(e)}")
+            
+        # 执行标准删除操作，删除数据库记录
+        super().delete(*args, **kwargs)
+        
+        # 删除物理文件
+        try:
+            # 方法1: 使用storage API
+            if file_name and storage.exists(file_name):
+                storage.delete(file_name)
+                logger.info(f"使用storage API删除文件成功: {file_name}")
+                
+            # 方法2: 尝试使用os.remove作为备份
+            if hasattr(self.file, 'path') and os.path.exists(self.file.path):
+                os.remove(self.file.path)
+                logger.info(f"使用os.remove删除文件成功: {self.file.path}")
+                
+        except Exception as e:
+            logger.error(f"删除物理文件失败: {str(e)}")
+            logger.exception("删除文件详细错误")
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (

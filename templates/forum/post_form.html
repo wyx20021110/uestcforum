@@ -77,7 +77,7 @@
                                         <div class="attachment-preview">
                                             {% with file_extension=attachment.filename|lower %}
                                                 {% if '.jpg' in file_extension or '.jpeg' in file_extension or '.png' in file_extension or '.gif' in file_extension %}
-                                                    <img src="{{ attachment.file.url }}" alt="{{ attachment.filename }}" class="img-fluid rounded">
+                                                    <img src="{{ attachment.file.url }}?t={{ attachment.uploaded_at|date:'U' }}" alt="{{ attachment.filename }}" class="img-fluid rounded">
                                                 {% else %}
                                                     <div class="p-3 border rounded text-center">
                                                         <i class="fas fa-file fa-2x mb-2"></i>
@@ -85,11 +85,11 @@
                                                     </div>
                                                 {% endif %}
                                             {% endwith %}
-                                            <a href="{% url 'forum:attachment_delete' attachment.id %}" 
-                                                class="btn btn-sm btn-light delete-attachment"
-                                                onclick="return confirm('确定要删除这个文件吗？')">
+                                            <button type="button" class="btn btn-sm btn-light delete-attachment-btn" 
+                                                    data-attachment-id="{{ attachment.id }}" 
+                                                    style="position: absolute; top: 5px; right: 5px;">
                                                 <i class="fas fa-times text-danger"></i>
-                                            </a>
+                                            </button>
                                         </div>
                                     </div>
                                 {% endfor %}
@@ -113,23 +113,137 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // 文本编辑器增强
-    $('#id_content').on('keydown', function(e) {
-        if (e.keyCode === 9) {
-            e.preventDefault();
-            var start = this.selectionStart;
-            var end = this.selectionEnd;
-            this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 4;
-        }
-    });
+    const contentField = document.getElementById('id_content');
+    if (contentField) {
+        contentField.addEventListener('keydown', function(e) {
+            if (e.keyCode === 9) {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    }
     
     // 预览上传的图片
-    $('#id_attachments').on('change', function() {
-        console.log("Files selected");
+    const attachmentInput = document.getElementById('id_attachments');
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', function() {
+            console.log("Files selected");
+        });
+    }
+    
+    // 获取CSRF令牌，用于安全提交
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+    // 处理删除附件按钮点击
+    document.querySelectorAll('.delete-attachment-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const attachmentId = this.getAttribute('data-attachment-id');
+            
+            // 确认删除
+            if (confirm('确定要删除这个文件吗？')) {
+                console.log(`准备删除附件ID: ${attachmentId}`);
+                
+                // 显示删除中状态
+                const originalHtml = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                this.disabled = true;
+                
+                // 创建删除请求
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                
+                // 发送删除请求
+                fetch(`/attachments/${attachmentId}/delete/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log(`删除请求状态: ${response.status}`);
+                    if (!response.ok) {
+                        // 如果响应状态码不是2xx，立即抛出错误
+                        throw new Error(`服务器响应错误: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('删除成功，服务器响应:', data);
+                    
+                    // 显示成功消息
+                    showMessage('success', '文件删除成功！');
+                    
+                    // 从DOM中移除附件元素
+                    const attachmentElement = this.closest('.col-md-4, .col-6');
+                    attachmentElement.remove();
+                    
+                    // 检查是否还有其他附件
+                    const attachmentPreviews = document.querySelectorAll('.attachment-preview');
+                    if (attachmentPreviews.length === 0) {
+                        // 查找包含"已上传文件"文本的h6元素
+                        const headers = Array.from(document.querySelectorAll('.mb-4 h6'));
+                        const uploadedFilesHeader = headers.find(h => h.textContent.includes('已上传文件'));
+                        if (uploadedFilesHeader) {
+                            const attachmentsSection = uploadedFilesHeader.closest('.mb-4');
+                            if (attachmentsSection) {
+                                attachmentsSection.style.display = 'none';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('删除请求失败:', error);
+                    
+                    // 恢复按钮状态
+                    this.innerHTML = originalHtml;
+                    this.disabled = false;
+                    
+                    // 显示错误信息
+                    showMessage('danger', '删除文件失败，请重试');
+                });
+            }
+        });
     });
+    
+    // 显示消息辅助函数
+    function showMessage(type, text) {
+        // 首先清除所有现有的消息，以防止多个消息堆叠
+        const existingAlerts = document.querySelectorAll('.alert');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        // 创建消息元素
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${text}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // 添加到页面顶部
+        const cardBody = document.querySelector('.card-body');
+        cardBody.insertBefore(alertDiv, cardBody.firstChild);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            if (alertDiv.parentNode) {  // 确保元素仍在DOM中
+                alertDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {  // 再次检查元素是否仍在DOM中
+                        alertDiv.remove();
+                    }
+                }, 150);
+            }
+        }, 3000);
+    }
 });
 </script>
 {% endblock %} 

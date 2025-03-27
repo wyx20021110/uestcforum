@@ -17,32 +17,6 @@
         margin: 0 auto;
     }
     
-    .avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background-color: #e9ecef;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-    
-    .avatar img {
-        object-fit: cover;
-    }
-    
-    .avatar-sm {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .avatar-xs {
-        width: 32px;
-        height: 32px;
-    }
-    
     .post-card {
         border-radius: 12px;
         border: none;
@@ -318,15 +292,17 @@
         <div class="card post-card animate__animated animate__fadeInUp animate__delay-{{ forloop.counter|divisibleby:3 }}s">
             <div class="card-body">
                 <div class="d-flex mb-3">
-                    <div class="avatar me-3">
-                        <a href="{% url 'users:user_profile' post.author.id %}">
-                            {% if post.author.profile.avatar %}
-                                <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
-                            {% else %}
+                    <a href="{% url 'users:user_profile' post.author.id %}" class="me-3" style="text-decoration: none;">
+                        {% if post.author.avatar %}
+                            <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                                <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
+                            </div>
+                        {% else %}
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
                                 <i class="fas fa-user-circle fa-lg"></i>
-                            {% endif %}
-                        </a>
-                    </div>
+                            </div>
+                        {% endif %}
+                    </a>
                     <div>
                         <h5 class="post-author mb-0">
                             <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
@@ -405,11 +381,13 @@
                         <form class="comment-form" data-post-id="{{ post.id }}">
                             {% csrf_token %}
                             <div class="d-flex">
-                                <div class="avatar avatar-sm me-2">
-                                    {% if user.profile.avatar %}
-                                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
+                                <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;" class="me-2">
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
                                     {% else %}
-                                        <i class="fas fa-user-circle"></i>
+                                        <div style="width: 100%; height: 100%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
                                     {% endif %}
                                 </div>
                                 <div class="flex-grow-1">
@@ -429,13 +407,17 @@
                         {% for comment in post.comments.all|slice:":3" %}
                             <div class="comment-item">
                                 <div class="d-flex">
-                                    <div class="avatar avatar-xs me-2">
-                                        {% if comment.author.profile.avatar %}
-                                            <img src="{{ comment.author.profile.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
+                                    <a href="{% url 'users:user_profile' comment.author.id %}" class="me-2" style="text-decoration: none;">
+                                        {% if comment.author.avatar %}
+                                            <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                                <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100">
+                                            </div>
                                         {% else %}
-                                            <i class="fas fa-user-circle"></i>
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
+                                                <i class="fas fa-user-circle"></i>
+                                            </div>
                                         {% endif %}
-                                    </div>
+                                    </a>
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center">
                                             <strong class="me-2">{{ comment.author.username }}</strong>
@@ -689,33 +671,78 @@
                 const commentItem = document.createElement('div');
                 commentItem.className = 'comment-item animate__animated animate__fadeIn';
                 
-                const avatarSrc = '{{ user.profile.avatar.url }}' || `https://ui-avatars.com/api/?name={{ user.username }}&background=random`;
-                const avatarHtml = '{{ user.profile.avatar }}' 
-                    ? `<img src="${avatarSrc}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">`
-                    : `<i class="fas fa-user-circle"></i>`;
+                // 修改生成的头像结构，使其与模板中的一致
+                let avatarHtml = '';
+                if ('{{ user.avatar }}') {
+                    avatarHtml = `
+                        <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
+                            <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
+                            </div>
+                        </a>
+                    `;
+                } else {
+                    avatarHtml = `
+                        <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                        </a>
+                    `;
+                }
                 
+                // 创建评论HTML结构
                 commentItem.innerHTML = `
                     <div class="d-flex">
-                        <div class="avatar avatar-xs me-2">
-                            ${avatarHtml}
-                        </div>
+                        ${avatarHtml}
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center">
                                 <strong class="me-2">{{ user.username }}</strong>
                                 <small class="post-time">刚刚</small>
                             </div>
-                            <div>${data.content}</div>
+                            <div>${content}</div>
                         </div>
                     </div>
                 `;
                 
-                // 添加新评论到评论列表的最前面
-                recentComments.insertBefore(commentItem, recentComments.firstChild);
+                // 添加到评论区最前面
+                recentComments.prepend(commentItem);
                 
                 // 更新评论计数
-                const commentCounter = document.querySelector(`button.interaction-btn[onclick="toggleCommentForm('${postId}')"] span`);
-                if (commentCounter) {
-                    commentCounter.textContent = data.comment_count;
+                const commentCountElement = document.querySelector(`button[onclick="toggleCommentForm('${postId}')"] span`);
+                if (commentCountElement) {
+                    let count = parseInt(commentCountElement.textContent);
+                    commentCountElement.textContent = count + 1;
+                }
+                
+                // 如果超过3条评论，检查是否需要添加"查看全部"链接
+                if (recentComments.querySelectorAll('.comment-item').length > 3) {
+                    // 保留最新的3条评论，删除多余的
+                    const allComments = recentComments.querySelectorAll('.comment-item');
+                    if (allComments.length > 3) {
+                        allComments[allComments.length - 1].remove();
+                    }
+                    
+                    // 检查是否已有"查看全部"链接
+                    let viewAllLink = recentComments.querySelector('.text-center');
+                    if (!viewAllLink) {
+                        const totalComments = parseInt(commentCountElement.textContent);
+                        viewAllLink = document.createElement('div');
+                        viewAllLink.className = 'text-center mt-2';
+                        viewAllLink.innerHTML = `
+                            <a href="/posts/${postId}/" class="btn btn-sm btn-outline-primary rounded-pill">
+                                查看全部 ${totalComments} 条评论
+                            </a>
+                        `;
+                        recentComments.appendChild(viewAllLink);
+                    } else {
+                        // 更新链接中的评论数
+                        const totalComments = parseInt(commentCountElement.textContent);
+                        const linkElement = viewAllLink.querySelector('a');
+                        if (linkElement) {
+                            linkElement.textContent = `查看全部 ${totalComments} 条评论`;
+                        }
+                    }
                 }
             })
             .catch(error => {

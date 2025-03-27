@@ -155,8 +155,15 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>{{ user.username }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if user.avatar %}
+                                    <div style="width: 28px; height: 28px; overflow: hidden; border-radius: 50%; margin-right: 0.5rem;">
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
+                                    </div>
+                                {% else %}
+                                    <i class="fas fa-user-circle me-1"></i>
+                                {% endif %}
+                                {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-id-card me-2"></i>个人资料</a></li>

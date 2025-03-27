@@ -12,7 +12,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
     }
+    
     .post-card {
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -86,15 +88,17 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div class="d-flex">
-                        <div class="avatar me-3">
-                            <a href="{% url 'users:user_profile' post.author.id %}">
-                                {% if post.author.profile.avatar %}
-                                    <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
-                                {% else %}
-                                    <i class="fas fa-user"></i>
-                                {% endif %}
-                            </a>
-                        </div>
+                        <a href="{% url 'users:user_profile' post.author.id %}" class="me-3" style="text-decoration: none;">
+                            {% if post.author.avatar %}
+                                <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                                    <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
+                                </div>
+                            {% else %}
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
+                                    <i class="fas fa-user-circle fa-lg"></i>
+                                </div>
+                            {% endif %}
+                        </a>
                         <div>
                             <h5 class="mb-0">
                                 <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
@@ -110,8 +114,7 @@
                                 <a href="{% url 'forum:post_edit' post.id %}" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-edit"></i> 编辑
                                 </a>
-                                <a href="{% url 'forum:post_delete' post.id %}" class="btn btn-outline-danger btn-sm" 
-                                onclick="return confirm('确定要删除这个动态吗？')">
+                                <a href="{% url 'forum:post_delete' post.id %}" class="btn btn-outline-danger btn-sm">
                                     <i class="fas fa-trash"></i> 删除
                                 </a>
                             </div>
@@ -199,15 +202,17 @@
                     {% for comment in post.comments.all %}
                         <div class="p-3 comment-card">
                             <div class="d-flex mb-2">
-                                <div class="avatar comment-avatar me-2">
-                                    <a href="{% url 'users:user_profile' comment.author.id %}">
-                                        {% if comment.author.profile.avatar %}
-                                            <img src="{{ comment.author.profile.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
-                                        {% else %}
-                                            <i class="fas fa-user"></i>
-                                        {% endif %}
-                                    </a>
-                                </div>
+                                <a href="{% url 'users:user_profile' comment.author.id %}" class="me-2" style="text-decoration: none;">
+                                    {% if comment.author.avatar %}
+                                        <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;">
+                                            <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100">
+                                        </div>
+                                    {% else %}
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
                                 <div>
                                     <h6 class="mb-0">
                                         <a href="{% url 'users:user_profile' comment.author.id %}" class="text-decoration-none text-dark">
