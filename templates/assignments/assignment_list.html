@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+
+{% block title %}作业/考试列表 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .assignments-header {
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        padding: 30px 0;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+    }
+    
+    .filter-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-card:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .filter-card .card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .filter-card .card-title:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 3px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+    }
+    
+    .assignment-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .assignment-card .card-body {
+        padding: 20px;
+    }
+    
+    .assignment-card .card-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .assignment-card .card-title a {
+        color: #2c3e50;
+        transition: all 0.3s ease;
+    }
+    
+    .assignment-card .card-title a:hover {
+        color: #3498db;
+    }
+    
+    .assignment-card .card-text {
+        color: #505a66;
+        margin-bottom: 15px;
+    }
+    
+    .assignment-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .badge-custom {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .badge-assignment {
+        background-color: rgba(52, 152, 219, 0.15);
+        color: #3498db;
+    }
+    
+    .badge-exam {
+        background-color: rgba(243, 156, 18, 0.15);
+        color: #f39c12;
+    }
+    
+    .badge-active {
+        background-color: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+    }
+    
+    .badge-upcoming {
+        background-color: rgba(52, 152, 219, 0.15);
+        color: #3498db;
+    }
+    
+    .badge-completed {
+        background-color: rgba(149, 165, 166, 0.15);
+        color: #7f8c8d;
+    }
+    
+    .badge-submitted {
+        background-color: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+    }
+    
+    .time-info {
+        display: flex;
+        align-items: center;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .time-info i {
+        width: 18px;
+        margin-right: 8px;
+        color: #3498db;
+    }
+    
+    .action-btn {
+        border-radius: 30px;
+        padding: 8px 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .action-btn i {
+        margin-right: 5px;
+    }
+    
+    .filter-form .form-check-input {
+        cursor: pointer;
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+    
+    .filter-form .form-check-input:checked {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+    
+    .filter-form .form-check-label {
+        cursor: pointer;
+        font-weight: 500;
+        color: #505a66;
+    }
+    
+    .filter-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-section-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+    
+    .filter-form .btn {
+        border-radius: 30px;
+        font-weight: 500;
+    }
+    
+    .dropdown-toggle-no-caret::after {
+        display: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #bdc3c7;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h4 {
+        font-weight: 600;
+        color: #7f8c8d;
+        margin-bottom: 10px;
+    }
+    
+    .pagination {
+        margin-top: 2rem;
+    }
+    
+    .page-link {
+        border-radius: 50%;
+        margin: 0 3px;
+        border: none;
+        color: #505a66;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #3498db;
+    }
+    
+    .status-indicator {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 10px;
+        height: 100%;
+    }
+    
+    .status-active {
+        background-color: #2ecc71;
+    }
+    
+    .status-upcoming {
+        background-color: #3498db;
+    }
+    
+    .status-completed {
+        background-color: #95a5a6;
+    }
+    
+    @media (max-width: 768px) {
+        .assignments-header {
+            padding: 20px 15px;
+        }
+        
+        .filter-card {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 标题区域 -->
+<div class="assignments-header animate__animated animate__fadeIn">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-tasks me-2"></i>作业/考试列表</h1>
+                <p class="mb-0">查看和管理您的学习任务</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                {% if user.role == 'teacher' or user.is_superuser %}
+                <div>
+                    <a href="{% url 'assignments:pending_text_submissions' %}" class="btn btn-light me-2 action-btn animate__animated animate__pulse">
+                        <i class="fas fa-clipboard-check"></i> 待评分简答题
+                    </a>
+                    <a href="{% url 'assignments:assignment_create' %}" class="btn btn-light action-btn animate__animated animate__pulse">
+                        <i class="fas fa-plus"></i> 创建新任务
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- 左侧筛选栏 -->
+        <div class="col-md-3">
+            <div class="filter-card card animate__animated animate__fadeInLeft">
+                <div class="card-body">
+                    <h5 class="card-title">筛选条件</h5>
+                    <form method="get" class="filter-form">
+                        <div class="filter-section">
+                            <div class="filter-section-title">类型</div>
+                            <div class="form-check mb-2">
+                                <input type="radio" class="form-check-input" id="type-all" name="type" value="all" {% if not request.GET.type or request.GET.type == 'all' %}checked{% endif %}>
+                                <label class="form-check-label" for="type-all">全部</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="radio" class="form-check-input" id="type-assignment" name="type" value="assignment" {% if request.GET.type == 'assignment' %}checked{% endif %}>
+                                <label class="form-check-label" for="type-assignment">作业</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="type-exam" name="type" value="exam" {% if request.GET.type == 'exam' %}checked{% endif %}>
+                                <label class="form-check-label" for="type-exam">考试</label>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-section-title">状态</div>
+                            <div class="form-check mb-2">
+                                <input type="radio" class="form-check-input" id="status-all" name="status" value="all" {% if not request.GET.status or request.GET.status == 'all' %}checked{% endif %}>
+                                <label class="form-check-label" for="status-all">全部</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="radio" class="form-check-input" id="status-active" name="status" value="active" {% if request.GET.status == 'active' %}checked{% endif %}>
+                                <label class="form-check-label" for="status-active">进行中</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="radio" class="form-check-input" id="status-upcoming" name="status" value="upcoming" {% if request.GET.status == 'upcoming' %}checked{% endif %}>
+                                <label class="form-check-label" for="status-upcoming">即将开始</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="status-completed" name="status" value="completed" {% if request.GET.status == 'completed' %}checked{% endif %}>
+                                <label class="form-check-label" for="status-completed">已结束</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-filter me-2"></i>应用筛选
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="col-md-9">
+            {% if assignments %}
+                {% for assignment in assignments %}
+                    <div class="assignment-card card animate__animated animate__fadeInUp animate__delay-{{ forloop.counter|divisibleby:2 }}s">
+                        <div class="card-body position-relative">
+                            <div class="status-indicator 
+                                {% if assignment.is_active %}status-active
+                                {% elif assignment.is_upcoming %}status-upcoming
+                                {% else %}status-completed{% endif %}">
+                            </div>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title">
+                                        <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="stretched-link text-decoration-none">
+                                            {{ assignment.title }}
+                                        </a>
+                                    </h5>
+                                    <div class="assignment-meta">
+                                        <span class="badge-custom {% if assignment.type == 'assignment' %}badge-assignment{% else %}badge-exam{% endif %}">
+                                            <i class="{% if assignment.type == 'assignment' %}fas fa-file-alt{% else %}fas fa-file-signature{% endif %} me-1"></i>
+                                            {{ assignment.get_type_display }}
+                                        </span>
+                                        
+                                        {% if assignment.is_active %}
+                                            <span class="badge-custom badge-active">
+                                                <i class="fas fa-hourglass-half me-1"></i> 进行中
+                                            </span>
+                                        {% elif assignment.is_upcoming %}
+                                            <span class="badge-custom badge-upcoming">
+                                                <i class="fas fa-clock me-1"></i> 即将开始
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-custom badge-completed">
+                                                <i class="fas fa-check-circle me-1"></i> 已结束
+                                            </span>
+                                        {% endif %}
+                                        
+                                        {% if not user.role == 'teacher' and not user.is_superuser %}
+                                            {% if assignment.user_submission %}
+                                                <span class="badge-custom badge-submitted">
+                                                    <i class="fas fa-paper-plane me-1"></i> 已提交
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {% if user.role == 'teacher' or user.is_superuser %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm dropdown-toggle-no-caret" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'assignments:assignment_update' assignment.pk %}">
+                                                    <i class="fas fa-edit text-primary me-2"></i> 编辑
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'assignments:submission_list' assignment.pk %}">
+                                                    <i class="fas fa-list-alt text-info me-2"></i> 提交记录
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'assignments:assignment_statistics' assignment.pk %}">
+                                                    <i class="fas fa-chart-bar text-success me-2"></i> 统计分析
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="{% url 'assignments:assignment_delete' assignment.pk %}">
+                                                    <i class="fas fa-trash me-2"></i> 删除
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="card-text">{{ assignment.description|truncatewords:30 }}</p>
+                            
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                                <div>
+                                    <div class="time-info">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <span>开始时间：{{ assignment.start_time|date:"Y-m-d H:i" }}</span>
+                                    </div>
+                                    <div class="time-info">
+                                        <i class="far fa-calendar-check"></i>
+                                        <span>截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 mt-md-0">
+                                    {% if not user.role == 'teacher' and not user.is_superuser %}
+                                        {% if assignment.user_submission %}
+                                            <a href="{% url 'assignments:submission_result' assignment.pk assignment.user_submission.pk %}" class="btn btn-outline-success action-btn">
+                                                <i class="fas fa-eye"></i> 查看结果
+                                            </a>
+                                        {% elif assignment.is_active %}
+                                            <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-primary action-btn">
+                                                <i class="fas fa-pencil-alt"></i> 立即提交
+                                            </a>
+                                        {% elif assignment.is_upcoming %}
+                                            <button class="btn btn-outline-primary action-btn" disabled>
+                                                <i class="fas fa-clock"></i> 尚未开始
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-outline-secondary action-btn" disabled>
+                                                <i class="fas fa-ban"></i> 已截止
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- 分页 -->
+                {% if is_paginated %}
+                    <div class="d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state animate__animated animate__fadeIn">
+                    <i class="fas fa-tasks"></i>
+                    <h4>暂无作业或考试</h4>
+                    <p class="text-muted mb-3">
+                        {% if request.GET.type or request.GET.status %}
+                            没有找到符合当前筛选条件的作业或考试。
+                        {% else %}
+                            当前没有任何作业或考试。
+                        {% endif %}
+                    </p>
+                    {% if user.role == 'teacher' or user.is_superuser %}
+                        <a href="{% url 'assignments:assignment_create' %}" class="btn btn-primary action-btn">
+                            <i class="fas fa-plus me-2"></i>创建新任务
+                        </a>
+                    {% else %}
+                        <a href="?status=all&type=all" class="btn btn-outline-primary action-btn">
+                            <i class="fas fa-sync-alt me-2"></i>重置筛选
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 为每个作业卡片添加延迟动画效果
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.assignment-card');
+        cards.forEach((card, index) => {
+            const delay = (index % 4) * 0.1;
+            card.style.animationDelay = `${delay}s`;
+        });
+        
+        // 为筛选表单添加即时提交功能
+        const filterInputs = document.querySelectorAll('.filter-form input[type="radio"]');
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                this.closest('form').submit();
+            });
+        });
+    });
+</script>
+{% endblock %} 

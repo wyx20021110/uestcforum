@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .post-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .interaction-btn {
+        border: none;
+        background: none;
+        color: #6c757d;
+        transition: all 0.2s;
+    }
+    .interaction-btn:hover {
+        color: #0d6efd;
+    }
+    .post-content {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    .post-time {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    .post-divider {
+        margin: 0.5rem 0;
+        opacity: 0.1;
+    }
+    .comment-card {
+        border-left: 3px solid #e9ecef;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    .comment-card:hover {
+        border-left-color: #0d6efd;
+    }
+    .comment-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    .interaction-btn.processing {
+        opacity: 0.7;
+        pointer-events: none;
+        position: relative;
+    }
+
+    .interaction-btn.processing::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        top: 50%;
+        right: 0;
+        margin-top: -6px;
+        margin-right: -18px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #3498db;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- 帖子内容 -->
+        <div class="card mb-4 post-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex">
+                        <div class="avatar me-3">
+                            <a href="{% url 'users:user_profile' post.author.id %}">
+                                {% if post.author.profile.avatar %}
+                                    <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">
+                                <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
+                                    {{ post.author.username }}
+                                </a>
+                            </h5>
+                            <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                    </div>
+                    <div>
+                        {% if user == post.author or user.is_staff %}
+                            <div class="btn-group">
+                                <a href="{% url 'forum:post_edit' post.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </a>
+                                <a href="{% url 'forum:post_delete' post.id %}" class="btn btn-outline-danger btn-sm" 
+                                onclick="return confirm('确定要删除这个动态吗？')">
+                                    <i class="fas fa-trash"></i> 删除
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if post.title %}
+                    <h4 class="card-title mb-3">{{ post.title }}</h4>
+                {% endif %}
+                
+                <div class="post-content">
+                    {{ post.content|linebreaks }}
+                </div>
+                
+                {% if post.attachments.exists %}
+                    <div class="attachments mb-3">
+                        <div class="row">
+                            {% for attachment in post.attachments.all %}
+                                <div class="col-6 col-md-4 mb-2">
+                                    <a href="{{ attachment.file.url }}" class="text-decoration-none" target="_blank">
+                                        {% with file_extension=attachment.filename|lower %}
+                                            {% if '.jpg' in file_extension or '.jpeg' in file_extension or '.png' in file_extension or '.gif' in file_extension %}
+                                                <img src="{{ attachment.file.url }}" alt="{{ attachment.filename }}" class="img-fluid rounded">
+                                            {% else %}
+                                                <div class="p-3 border rounded text-center">
+                                                    <i class="fas fa-paperclip"></i>
+                                                    <div class="small text-truncate mt-1">{{ attachment.filename }}</div>
+                                                </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <hr class="post-divider">
+                
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">
+                        <i class="far fa-comment"></i> {{ post.comments.count }} 评论
+                    </span>
+                    <button type="button" class="btn interaction-btn like-btn" data-post-id="{{ post.id }}">
+                        <span class="like-icon">
+                            {% if user in post.likes.all %}
+                                <i class="fas fa-heart text-danger"></i>
+                            {% else %}
+                                <i class="far fa-heart"></i>
+                            {% endif %}
+                        </span>
+                        赞 (<span class="like-count">{{ post.likes.count }}</span>)
+                    </button>
+                    <a href="{% url 'forum:post_list' %}" class="text-muted text-decoration-none">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论区 -->
+        <div class="card post-card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">评论 ({{ post.comments.count }})</h5>
+                
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'forum:comment_create' post.id %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="3" placeholder="写下你的评论..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary rounded-pill">
+                            <i class="far fa-paper-plane"></i> 发表评论
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-info">
+                        请<a href="{% url 'users:login' %}">登录</a>后发表评论
+                    </div>
+                {% endif %}
+
+                <!-- 评论列表 -->
+                <div class="comments-list">
+                    {% for comment in post.comments.all %}
+                        <div class="p-3 comment-card">
+                            <div class="d-flex mb-2">
+                                <div class="avatar comment-avatar me-2">
+                                    <a href="{% url 'users:user_profile' comment.author.id %}">
+                                        {% if comment.author.profile.avatar %}
+                                            <img src="{{ comment.author.profile.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">
+                                        <a href="{% url 'users:user_profile' comment.author.id %}" class="text-decoration-none text-dark">
+                                            {{ comment.author.username }}
+                                        </a>
+                                    </h6>
+                                    <small class="post-time">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                </div>
+                                {% if user == comment.author or user.is_staff %}
+                                    <div class="ms-auto">
+                                        <a href="{% url 'forum:comment_edit' comment.id %}" class="btn btn-sm interaction-btn">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'forum:comment_delete' comment.id %}" class="btn btn-sm interaction-btn text-danger"
+                                        onclick="return confirm('确定要删除这条评论吗？')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="ps-5">
+                                {{ comment.content|linebreaks }}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center my-4">
+                            <p class="text-muted">暂无评论，快来抢沙发吧！</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeBtn = document.querySelector('.like-btn');
+    const postId = likeBtn.getAttribute('data-post-id');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const likeIcon = likeBtn.querySelector('.like-icon');
+    const likeCount = document.querySelector('.like-count');
+    
+    console.log('初始化详情页点赞按钮 - 帖子ID:', postId);
+    
+    likeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('点击详情页点赞按钮 - 帖子ID:', postId);
+        
+        // 视觉反馈
+        likeBtn.classList.add('processing');
+        
+        // 使用fetch API发送请求
+        fetch(`/posts/${postId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `post_id=${postId}&csrfmiddlewaretoken=${csrfToken}`
+        })
+        .then(response => {
+            console.log('收到服务器响应:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`服务器返回错误: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('解析响应数据:', data);
+            if (data.status === 'success') {
+                // 更新点赞数
+                likeCount.textContent = data.likes_count;
+                console.log('更新点赞数为:', data.likes_count);
+                
+                // 更新点赞图标
+                if (data.is_liked) {
+                    likeIcon.innerHTML = '<i class="fas fa-heart text-danger"></i>';
+                    likeBtn.classList.add('liked');
+                    console.log('已点赞');
+                } else {
+                    likeIcon.innerHTML = '<i class="far fa-heart"></i>';
+                    likeBtn.classList.remove('liked');
+                    console.log('取消点赞');
+                }
+            } else {
+                console.error('服务器返回错误:', data.message || '未知错误');
+                alert('操作失败: ' + (data.message || '未知错误'));
+            }
+        })
+        .catch(error => {
+            console.error('点赞请求出错:', error);
+            alert('点赞操作失败，请重试！');
+        })
+        .finally(() => {
+            likeBtn.classList.remove('processing');
+        });
+    });
+});
+</script>
+{% endblock %} 

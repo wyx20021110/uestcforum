@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title }} - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resource-form-container {
+        max-width: 800px;
+        margin: 30px auto 60px;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        padding: 2rem;
+        border-radius: 15px 15px 0 0;
+        color: white;
+    }
+    
+    .form-header h2 {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .form-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .form-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-card .card-body {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .form-section-title {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        color: #2c3e50;
+    }
+    
+    .form-section-title i {
+        margin-right: 10px;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4481eb;
+        box-shadow: 0 0 0 3px rgba(68, 129, 235, 0.2);
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .upload-btn-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .upload-btn {
+        border: 2px dashed #4481eb;
+        border-radius: 10px;
+        padding: 2rem;
+        color: #4481eb;
+        background-color: rgba(68, 129, 235, 0.05);
+        text-align: center;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .upload-btn:hover {
+        background-color: rgba(68, 129, 235, 0.1);
+        border-color: #04befe;
+    }
+    
+    .upload-btn i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .upload-btn-wrapper input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .file-info {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #4481eb;
+    }
+    
+    .file-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: #4481eb;
+    }
+    
+    .file-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        word-break: break-all;
+    }
+    
+    .file-size {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(68, 129, 235, 0.3);
+    }
+    
+    .cancel-btn {
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-3px);
+    }
+    
+    .error-feedback {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .file-preview {
+        display: none;
+        position: relative;
+        margin-top: 1rem;
+    }
+    
+    .file-preview img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .file-preview .file-remove {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        color: #dc3545;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .file-preview .file-remove:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    /* 优化错误消息显示 */
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 767.98px) {
+        .form-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resource-form-container">
+    <div class="form-card card animate__animated animate__fadeIn">
+        <div class="form-header">
+            <h2>{{ form_title }}</h2>
+            <p>
+                {% if form.instance.pk %}
+                更新教学资源信息，帮助学生更好地学习
+                {% else %}
+                上传优质教学资源，分享知识，助力学生学习成长
+                {% endif %}
+            </p>
+        </div>
+        <div class="card-body">
+            {% if form.errors %}
+            <div class="error-feedback animate__animated animate__headShake">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>提交出错：</strong>
+                <ul class="mb-0 mt-2">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <form method="post" enctype="multipart/form-data" id="resource-form">
+                {% csrf_token %}
+                
+                <!-- 基本信息部分 -->
+                <div class="form-section animate__animated animate__fadeInUp">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-info-circle"></i> 基本信息
+                    </h3>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">资源标题</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">请输入简洁明了的标题，便于学生理解资源内容</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">资源分类</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">选择合适的分类，帮助学生更快找到资源</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">资源描述</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">详细描述资源内容，添加关键词有助于资源被搜索到</div>
+                    </div>
+                </div>
+                
+                <!-- 文件上传部分 -->
+                <div class="form-section animate__animated animate__fadeInUp animate__delay-1s">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-file-upload"></i> 文件上传
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <div class="upload-btn-wrapper">
+                            <div class="upload-btn" id="upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h5>点击或拖拽文件到此处上传</h5>
+                                <p class="mb-0 text-muted">支持PPT、Word、PDF、图片等多种格式文件，单个文件最大100MB</p>
+                            </div>
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                                <div class="invalid-feedback">{{ form.file.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- 文件预览区域 -->
+                        <div class="file-info" id="file-info">
+                            <div class="d-flex align-items-center">
+                                <i class="file-icon fas fa-file-alt" id="file-type-icon"></i>
+                                <div>
+                                    <div class="file-name" id="file-name"></div>
+                                    <div class="file-size" id="file-size"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 图片预览 -->
+                        <div class="file-preview" id="image-preview">
+                            <img src="#" id="preview-image">
+                            <div class="file-remove" id="remove-file">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if form.instance.file %}
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-3 fa-lg"></i>
+                            <div>
+                                <strong>当前文件：</strong> {{ form.instance.file.name|cut:'resources/' }}
+                                <div class="mt-2">
+                                    <small>如果上传新文件，将替换此文件</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- 附加设置 -->
+                <div class="form-section animate__animated animate__fadeInUp animate__delay-2s">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-cog"></i> 附加设置
+                    </h3>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_public }}
+                            <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                                公开资源（所有学生可查看下载）
+                            </label>
+                            {% if form.is_public.errors %}
+                                <div class="invalid-feedback">{{ form.is_public.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-text">如不勾选，仅特定班级的学生可查看</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.allowed_classes.id_for_label }}" class="form-label">允许访问的班级</label>
+                        {{ form.allowed_classes }}
+                        {% if form.allowed_classes.errors %}
+                            <div class="invalid-feedback">{{ form.allowed_classes.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">选择可以访问此资源的班级（按住Ctrl键可多选）</div>
+                    </div>
+                </div>
+                
+                <!-- 按钮组 -->
+                <div class="d-flex justify-content-between mt-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <a href="{% url 'resources:resource_list' %}" class="btn cancel-btn">
+                        <i class="fas fa-arrow-left me-2"></i>返回列表
+                    </a>
+                    <button type="submit" class="btn submit-btn">
+                        <i class="fas fa-save me-2"></i>
+                        {% if form.instance.pk %}
+                        保存更新
+                        {% else %}
+                        上传资源
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 美化表单控件
+        const formControls = document.querySelectorAll('.form-control, .form-select');
+        formControls.forEach(control => {
+            if (control.classList.contains('is-invalid')) {
+                control.classList.add('is-invalid');
+            }
+        });
+        
+        // 初始化标题输入框
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        if (titleInput) {
+            titleInput.classList.add('form-control');
+            titleInput.placeholder = '请输入资源标题（如：《高等数学》期末复习资料）';
+        }
+        
+        // 初始化分类选择框
+        const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+        if (categorySelect) {
+            categorySelect.classList.add('form-select');
+        }
+        
+        // 初始化描述文本框
+        const descriptionTextarea = document.getElementById('{{ form.description.id_for_label }}');
+        if (descriptionTextarea) {
+            descriptionTextarea.classList.add('form-control');
+            descriptionTextarea.rows = 5;
+            descriptionTextarea.placeholder = '请详细描述资源内容、适用对象和使用方法等...';
+        }
+        
+        // 初始化文件上传控件
+        const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+        if (fileInput) {
+            fileInput.classList.add('form-control');
+            fileInput.classList.add('visually-hidden');
+            
+            // 显示文件信息
+            fileInput.addEventListener('change', function(e) {
+                showFileInfo(this);
+            });
+        }
+        
+        // 初始化公开设置复选框
+        const isPublicCheckbox = document.getElementById('{{ form.is_public.id_for_label }}');
+        if (isPublicCheckbox) {
+            isPublicCheckbox.classList.add('form-check-input');
+        }
+        
+        // 初始化班级多选框
+        const classesSelect = document.getElementById('{{ form.allowed_classes.id_for_label }}');
+        if (classesSelect) {
+            classesSelect.classList.add('form-select');
+            classesSelect.multiple = true;
+            classesSelect.size = 5;
+        }
+        
+        // 文件删除按钮
+        const removeFileBtn = document.getElementById('remove-file');
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                hideFilePreview();
+            });
+        }
+        
+        // 上传区域点击触发文件选择
+        const uploadLabel = document.getElementById('upload-label');
+        if (uploadLabel && fileInput) {
+            uploadLabel.addEventListener('click', function() {
+                fileInput.click();
+            });
+        }
+        
+        // 处理文件拖拽
+        const uploadWrapper = document.querySelector('.upload-btn-wrapper');
+        if (uploadWrapper) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadWrapper.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadWrapper.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadWrapper.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadWrapper.querySelector('.upload-btn').classList.add('bg-light');
+            }
+            
+            function unhighlight() {
+                uploadWrapper.querySelector('.upload-btn').classList.remove('bg-light');
+            }
+            
+            uploadWrapper.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    showFileInfo(fileInput);
+                }
+            }
+        }
+        
+        // 显示文件信息
+        function showFileInfo(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileInfo = document.getElementById('file-info');
+                const fileName = document.getElementById('file-name');
+                const fileSize = document.getElementById('file-size');
+                const fileTypeIcon = document.getElementById('file-type-icon');
+                
+                // 显示文件名和大小
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                // 更新图标
+                fileTypeIcon.className = 'file-icon fas ' + getFileIcon(file.name);
+                
+                // 显示文件信息区域
+                fileInfo.style.display = 'block';
+                
+                // 如果是图片，显示预览
+                if (file.type.match('image.*')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imagePreview = document.getElementById('image-preview');
+                        const previewImage = document.getElementById('preview-image');
+                        
+                        previewImage.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+        
+        // 隐藏文件预览
+        function hideFilePreview() {
+            document.getElementById('file-info').style.display = 'none';
+            document.getElementById('image-preview').style.display = 'none';
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 根据文件类型获取图标
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            
+            switch(ext) {
+                case 'pdf':
+                    return 'fa-file-pdf';
+                case 'doc':
+                case 'docx':
+                    return 'fa-file-word';
+                case 'xls':
+                case 'xlsx':
+                    return 'fa-file-excel';
+                case 'ppt':
+                case 'pptx':
+                    return 'fa-file-powerpoint';
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
+                    return 'fa-file-image';
+                case 'zip':
+                case 'rar':
+                case '7z':
+                    return 'fa-file-archive';
+                case 'mp4':
+                case 'avi':
+                case 'mov':
+                    return 'fa-file-video';
+                case 'mp3':
+                case 'wav':
+                    return 'fa-file-audio';
+                default:
+                    return 'fa-file-alt';
+            }
+        }
+    });
+</script>
+{% endblock %} 

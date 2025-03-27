@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load assignment_filters %}
+
+{% block title %}{{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ assignment.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        类型：{{ assignment.get_type_display }} | 
+                        开始时间：{{ assignment.start_time|date:"Y-m-d H:i" }} | 
+                        结束时间：{{ assignment.end_time|date:"Y-m-d H:i" }} |
+                        总分：{{ assignment.total_score }}
+                    </p>
+                    <div class="mb-4">
+                        {{ assignment.description|linebreaks }}
+                    </div>
+                    
+                    {% if assignment.questions.exists %}
+                        <h4>题目列表</h4>
+                        <div class="list-group">
+                            {% for question in assignment.questions.all %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1">第{{ forloop.counter }}题</h5>
+                                            <p class="mb-1">{{ question.content }}</p>
+                                            {% if question.type == 'choice' %}
+                                                <div class="ml-4">
+                                                    {% for choice in question.choices.all %}
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="question_{{ question.id }}" 
+                                                                   value="{{ choice.id }}" 
+                                                                   id="choice{{ choice.id }}">
+                                                            <label class="form-check-label" for="choice{{ choice.id }}">
+                                                                {{ choice.content }}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-primary">{{ question.score }}分</span>
+                                            {% if question.type == 'choice' %}
+                                                <span class="badge bg-info">
+                                                    正确率：{{ question.correct_rate|multiply:100|floatformat:1 }}%
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>操作</h4>
+                </div>
+                <div class="card-body">
+                    {% if user.is_teacher %}
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'assignments:question_create' assignment.pk %}" class="btn btn-primary">
+                                添加题目
+                            </a>
+                            <a href="{% url 'assignments:assignment_update' assignment.pk %}" class="btn btn-warning">
+                                编辑作业/考试
+                            </a>
+                            <a href="{% url 'assignments:assignment_delete' assignment.pk %}" class="btn btn-danger">
+                                删除作业/考试
+                            </a>
+                            <a href="{% url 'assignments:submission_list' assignment.pk %}" class="btn btn-info">
+                                查看提交记录
+                            </a>
+                        </div>
+                    {% else %}
+                        {% if not user_submission %}
+                            <form method="post" action="{% url 'assignments:submit_assignment' assignment.pk %}">
+                                {% csrf_token %}
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        {% if assignment.type == 'assignment' %}
+                                            提交作业
+                                        {% else %}
+                                            开始考试
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-info">
+                                您已经提交了作业/考试
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

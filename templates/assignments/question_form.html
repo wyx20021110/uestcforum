@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if question %}编辑题目{% else %}创建题目{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{% if question %}编辑题目{% else %}创建题目{% endif %}</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">题目信息</h5>
+                {% for field in form %}
+                {% if not field.is_hidden %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ field.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                {{ field }}
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if form.instance.type in 'single,multiple' or not form.instance.pk %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">选项</h5>
+                {{ formset.management_form }}
+                <div id="choice-forms">
+                    {% for choice_form in formset %}
+                    <div class="choice-form mb-3">
+                        {% for hidden in choice_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="{{ choice_form.content.id_for_label }}">选项内容</label>
+                                    {{ choice_form.content }}
+                                    {% if choice_form.content.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ choice_form.content.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check">
+                                    {{ choice_form.is_correct }}
+                                    <label class="form-check-label" for="{{ choice_form.is_correct.id_for_label }}">
+                                        正确答案
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                {% if choice_form.instance.pk %}
+                                <div class="form-check">
+                                    {{ choice_form.DELETE }}
+                                    <label class="form-check-label" for="{{ choice_form.DELETE.id_for_label }}">
+                                        删除
+                                    </label>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if choice_form.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ choice_form.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-choice" class="btn btn-outline-secondary btn-sm mt-2">添加选项</button>
+            </div>
+        </div>
+        {% endif %}
+        
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-secondary">返回</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('id_type');
+        const choiceFormset = document.querySelector('.card.mb-4:nth-child(3)');
+        const addChoiceBtn = document.getElementById('add-choice');
+        
+        // 根据题目类型显示/隐藏选项表单
+        function toggleChoiceFormset() {
+            if (typeSelect.value === 'single' || typeSelect.value === 'multiple') {
+                choiceFormset.style.display = 'block';
+            } else {
+                choiceFormset.style.display = 'none';
+            }
+        }
+        
+        // 初始化时调用一次
+        if (typeSelect) {
+            toggleChoiceFormset();
+            typeSelect.addEventListener('change', toggleChoiceFormset);
+        }
+        
+        // 添加选项按钮的处理函数
+        if (addChoiceBtn) {
+            addChoiceBtn.addEventListener('click', function() {
+                const forms = document.querySelectorAll('.choice-form');
+                const formCount = forms.length;
+                
+                // 获取表单管理数据
+                const totalForms = document.querySelector('#id_choice_set-TOTAL_FORMS');
+                const newForm = forms[0].cloneNode(true);
+                
+                // 更新新表单中的所有ID和name属性
+                newForm.querySelectorAll('input, select, textarea, label').forEach(function(element) {
+                    if (element.id) {
+                        element.id = element.id.replace(/-\d+-/, '-' + formCount + '-');
+                    }
+                    if (element.name) {
+                        element.name = element.name.replace(/-\d+-/, '-' + formCount + '-');
+                    }
+                    if (element.getAttribute('for')) {
+                        element.setAttribute('for', element.getAttribute('for').replace(/-\d+-/, '-' + formCount + '-'));
+                    }
+                    
+                    // 清除输入值
+                    if (element.tagName === 'INPUT' && (element.type === 'text' || element.type === 'hidden')) {
+                        element.value = '';
+                    }
+                    if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+                        element.checked = false;
+                    }
+                });
+                
+                // 移除DELETE复选框区域（新表单不需要删除选项）
+                const deleteSection = newForm.querySelector('.col-md-2:last-child');
+                if (deleteSection) {
+                    deleteSection.innerHTML = '';
+                }
+                
+                // 添加新表单到DOM中
+                document.getElementById('choice-forms').appendChild(newForm);
+                
+                // 更新表单总数
+                totalForms.value = parseInt(totalForms.value) + 1;
+            });
+        }
+    });
+</script>
+{% endblock %} 

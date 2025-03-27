@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}注册 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+    
+    .register-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .register-card .card-body {
+        padding: 40px;
+    }
+    
+    .register-card .card-title {
+        font-weight: 700;
+        color: #2980b9;
+        margin-bottom: 30px;
+    }
+    
+    .register-form .form-control {
+        height: 50px;
+        border-radius: 8px;
+        padding-left: 15px;
+        font-size: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .register-form .form-control:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        border-color: #3498db;
+    }
+    
+    .register-form .form-label {
+        font-weight: 500;
+        color: #495057;
+        display: flex;
+        align-items: center;
+    }
+    
+    .register-form .form-label i {
+        margin-right: 8px;
+        color: #3498db;
+    }
+    
+    .register-form .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .register-btn {
+        height: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
+        background: linear-gradient(135deg, #2980b9 0%, #1c6ca1 100%);
+    }
+    
+    .register-link {
+        color: #3498db;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .register-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+    }
+    
+    .register-page-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        z-index: -1;
+        border-bottom-left-radius: 50% 20%;
+        border-bottom-right-radius: 50% 20%;
+    }
+    
+    .error-feedback {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #dc3545;
+    }
+    
+    @media (max-width: 768px) {
+        .register-card .card-body {
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-page-bg"></div>
+<div class="container register-container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="text-center mb-4 animate__animated animate__fadeInDown">
+                <h2 class="text-white">欢迎加入</h2>
+                <p class="text-white-50">创建账号体验高校师生互动交流平台</p>
+            </div>
+            
+            <div class="register-card card animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <h3 class="card-title text-center">
+                        <i class="fas fa-user-plus me-2"></i>用户注册
+                    </h3>
+                    
+                    {% if form.errors %}
+                    <div class="error-feedback animate__animated animate__headShake">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>注册出错：</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'users:register' %}" class="register-form">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {% if field.name == 'username' %}
+                                    <i class="fas fa-user"></i>
+                                {% elif field.name == 'email' %}
+                                    <i class="fas fa-envelope"></i>
+                                {% elif 'password' in field.name %}
+                                    <i class="fas fa-lock"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                                {{ field.label }}
+                            </label>
+                            
+                            <div class="input-group">
+                                {{ field }}
+                                {% if field.name == 'username' %}
+                                    <span class="input-group-text bg-light border-start-0">
+                                        <i class="fas fa-check-circle text-success d-none" id="username-valid"></i>
+                                        <i class="fas fa-times-circle text-danger d-none" id="username-invalid"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary register-btn">
+                                <i class="fas fa-user-plus me-2"></i>立即注册
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">已有账号？ <a href="{% url 'users:login' %}" class="register-link">立即登录</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4 text-white-50 animate__animated animate__fadeIn animate__delay-1s">
+                <small>注册即表示您同意我们的 <a href="#" class="text-white">服务条款</a> 和 <a href="#" class="text-white">隐私政策</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameField = document.getElementById('id_username');
+        if (usernameField) {
+            usernameField.addEventListener('input', function() {
+                const validIcon = document.getElementById('username-valid');
+                const invalidIcon = document.getElementById('username-invalid');
+                
+                if (this.value.length > 3) {
+                    validIcon.classList.remove('d-none');
+                    invalidIcon.classList.add('d-none');
+                } else if (this.value.length > 0) {
+                    validIcon.classList.add('d-none');
+                    invalidIcon.classList.remove('d-none');
+                } else {
+                    validIcon.classList.add('d-none');
+                    invalidIcon.classList.add('d-none');
+                }
+            });
+        }
+        
+        // 美化表单控件
+        const inputs = document.querySelectorAll('.register-form input');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+            
+            if (input.type === 'password') {
+                input.placeholder = '请输入安全密码';
+                input.autocomplete = 'new-password';
+            } else if (input.name === 'username') {
+                input.placeholder = '请输入用户名';
+                input.autocomplete = 'username';
+            } else if (input.name === 'email') {
+                input.placeholder = '请输入您的邮箱';
+                input.autocomplete = 'email';
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,771 @@
+{% extends 'base.html' %}
+
+{% block title %}论坛 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .forum-header {
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        padding: 30px 0;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+    }
+    
+    .forum-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .avatar img {
+        object-fit: cover;
+    }
+    
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .avatar-xs {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .post-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        margin-bottom: 25px;
+    }
+    
+    .post-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+    
+    .post-author {
+        font-weight: 600;
+    }
+    
+    .interaction-btn {
+        border: none;
+        background: none;
+        color: #6c757d;
+        transition: all 0.2s;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 20px;
+    }
+    
+    .interaction-btn:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .interaction-btn.active {
+        color: #0d6efd;
+    }
+    
+    .interaction-btn.liked {
+        color: #dc3545;
+    }
+    
+    .post-content {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+    }
+    
+    .post-time {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .post-divider {
+        margin: 1rem 0;
+        opacity: 0.1;
+    }
+    
+    .post-title {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+    
+    .post-title a:hover {
+        color: #3498db;
+    }
+    
+    .attachment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .attachment-item {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .attachment-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .attachment-file {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .attachment-file:hover {
+        background-color: #e9ecef;
+    }
+    
+    .comment-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .comment-form {
+        margin-bottom: 15px;
+    }
+    
+    .comment-input {
+        border-radius: 20px;
+        padding-left: 15px;
+    }
+    
+    .send-btn {
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .comment-item {
+        background-color: white;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .comment-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .new-post-btn {
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+    
+    .new-post-btn i {
+        margin-right: 8px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #adb5bd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h4 {
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    
+    .pagination-container {
+        margin-top: 2rem;
+    }
+    
+    .page-link {
+        border-radius: 20px;
+        margin: 0 3px;
+        border: none;
+        color: #495057;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    @media (max-width: 768px) {
+        .forum-header {
+            padding: 20px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .post-content {
+            font-size: 1rem;
+        }
+        
+        .attachment-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+    }
+    
+    .interaction-btn.processing {
+        opacity: 0.7;
+        pointer-events: none;
+        position: relative;
+    }
+    
+    .interaction-btn.processing::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        top: 50%;
+        right: 0;
+        margin-top: -6px;
+        margin-right: -18px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #3498db;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 论坛头部 -->
+<div class="forum-header animate__animated animate__fadeIn">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-comments me-2"></i>论坛动态</h1>
+                <p class="mb-0">分享知识，交流想法，连接彼此</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'forum:post_create' %}" class="btn btn-light new-post-btn animate__animated animate__pulse animate__infinite animate__slower">
+                        <i class="fas fa-edit"></i> 发布新动态
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-light">
+                        <i class="fas fa-sign-in-alt me-2"></i>登录发布
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 搜索和筛选 -->
+<div class="container forum-container mb-4">
+    <div class="card shadow-sm border-0 animate__animated animate__fadeIn">
+        <div class="card-body">
+            <form method="get" action="{% url 'forum:post_list' %}">
+                <div class="row g-2">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0" placeholder="搜索动态..." value="{{ request.GET.search|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">搜索</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 帖子列表 -->
+<div class="container forum-container">
+    {% for post in posts %}
+        <div class="card post-card animate__animated animate__fadeInUp animate__delay-{{ forloop.counter|divisibleby:3 }}s">
+            <div class="card-body">
+                <div class="d-flex mb-3">
+                    <div class="avatar me-3">
+                        <a href="{% url 'users:user_profile' post.author.id %}">
+                            {% if post.author.profile.avatar %}
+                                <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
+                            {% else %}
+                                <i class="fas fa-user-circle fa-lg"></i>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div>
+                        <h5 class="post-author mb-0">
+                            <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
+                                {{ post.author.username }}
+                            </a>
+                        </h5>
+                        <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                </div>
+                
+                {% if post.title %}
+                    <h4 class="post-title">
+                        <a href="{% url 'forum:post_detail' post.id %}" class="text-decoration-none text-dark">
+                            {{ post.title }}
+                        </a>
+                    </h4>
+                {% endif %}
+                
+                <div class="post-content">{{ post.content|linebreaks }}</div>
+                
+                {% if post.attachments.exists %}
+                    <div class="attachment-grid">
+                        {% for attachment in post.attachments.all %}
+                            <a href="{{ attachment.file.url }}" class="attachment-item" target="_blank">
+                                {% with file_extension=attachment.filename|lower %}
+                                    {% if '.jpg' in file_extension or '.jpeg' in file_extension or '.png' in file_extension or '.gif' in file_extension %}
+                                        <img src="{{ attachment.file.url }}" alt="{{ attachment.filename }}" class="img-fluid rounded">
+                                    {% else %}
+                                        <div class="attachment-file">
+                                            {% if '.pdf' in file_extension %}
+                                                <i class="far fa-file-pdf fa-2x text-danger mb-2"></i>
+                                            {% elif '.doc' in file_extension or '.docx' in file_extension %}
+                                                <i class="far fa-file-word fa-2x text-primary mb-2"></i>
+                                            {% elif '.xls' in file_extension or '.xlsx' in file_extension %}
+                                                <i class="far fa-file-excel fa-2x text-success mb-2"></i>
+                                            {% elif '.ppt' in file_extension or '.pptx' in file_extension %}
+                                                <i class="far fa-file-powerpoint fa-2x text-warning mb-2"></i>
+                                            {% else %}
+                                                <i class="far fa-file fa-2x text-secondary mb-2"></i>
+                                            {% endif %}
+                                            <div class="small text-truncate">{{ attachment.filename }}</div>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <hr class="post-divider">
+                
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn interaction-btn like-btn" data-post-id="{{ post.id }}">
+                        <span class="like-icon">
+                            {% if request.user in post.likes.all %}
+                                <i class="fas fa-heart"></i>
+                            {% else %}
+                                <i class="far fa-heart"></i>
+                            {% endif %}
+                        </span>
+                        <span class="like-count ms-1">{{ post.likes.count }}</span>
+                    </button>
+                    <button class="btn interaction-btn" onclick="toggleCommentForm('{{ post.id }}')">
+                        <i class="far fa-comment"></i>
+                        <span class="ms-1">{{ post.comments.count }}</span>
+                    </button>
+                    <a href="{% url 'forum:post_detail' post.id %}" class="btn interaction-btn">
+                        <i class="fas fa-share-alt"></i>
+                        <span class="ms-1">详情</span>
+                    </a>
+                </div>
+                
+                <!-- 评论表单和列表，默认隐藏 -->
+                <div id="comment-section-{{ post.id }}" class="comment-section mt-3" style="display: none;">
+                    {% if user.is_authenticated %}
+                        <form class="comment-form" data-post-id="{{ post.id }}">
+                            {% csrf_token %}
+                            <div class="d-flex">
+                                <div class="avatar avatar-sm me-2">
+                                    {% if user.profile.avatar %}
+                                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
+                                    {% else %}
+                                        <i class="fas fa-user-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="input-group">
+                                        <input type="text" name="content" class="form-control comment-input" placeholder="写下你的评论..." required>
+                                        <button type="submit" class="btn btn-primary send-btn">
+                                            <i class="far fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                    
+                    <!-- 最新的3条评论 -->
+                    <div class="recent-comments">
+                        {% for comment in post.comments.all|slice:":3" %}
+                            <div class="comment-item">
+                                <div class="d-flex">
+                                    <div class="avatar avatar-xs me-2">
+                                        {% if comment.author.profile.avatar %}
+                                            <img src="{{ comment.author.profile.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
+                                        {% else %}
+                                            <i class="fas fa-user-circle"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center">
+                                            <strong class="me-2">{{ comment.author.username }}</strong>
+                                            <small class="post-time">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                        </div>
+                                        <div>{{ comment.content }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4">
+                                <i class="far fa-comment-dots fa-2x text-muted mb-2"></i>
+                                <p class="mb-0">暂无评论，快来抢沙发吧！</p>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if post.comments.count > 3 %}
+                            <div class="text-center mt-2">
+                                <a href="{% url 'forum:post_detail' post.id %}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    查看全部 {{ post.comments.count }} 条评论
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-state animate__animated animate__fadeIn">
+            <i class="far fa-comment-dots"></i>
+            <h4>暂无动态</h4>
+            {% if request.GET.search %}
+                <p>没有找到与"{{ request.GET.search }}"相关的动态。</p>
+                <a href="{% url 'forum:post_list' %}" class="btn btn-outline-primary mt-2">查看全部动态</a>
+            {% else %}
+                <p>成为第一个发布动态的人吧！</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'forum:post_create' %}" class="btn btn-primary mt-2">
+                        <i class="fas fa-edit me-2"></i>发布动态
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-primary mt-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>登录后发布
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <!-- 分页 -->
+    {% if is_paginated %}
+        <div class="pagination-container d-flex justify-content-center">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 点赞功能 
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('加载点赞功能...');
+        const likeBtns = document.querySelectorAll('.like-btn');
+        console.log('找到', likeBtns.length, '个点赞按钮');
+        
+        likeBtns.forEach((btn, index) => {
+            console.log('初始化点赞按钮 #' + (index + 1) + ', data-post-id:', btn.dataset.postId);
+            
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const postId = this.dataset.postId;
+                console.log('点击点赞按钮, postId:', postId);
+                
+                if (!postId) {
+                    console.error('错误: 无法获取文章ID (data-post-id 属性缺失)');
+                    return;
+                }
+                
+                const likeIcon = this.querySelector('.like-icon');
+                const likeCount = this.querySelector('.like-count');
+                
+                // 获取CSRF令牌
+                let csrfToken = '';
+                const metaTag = document.querySelector('meta[name="csrf-token"]');
+                if (metaTag) {
+                    csrfToken = metaTag.getAttribute('content');
+                    console.log('从meta标签获取CSRF令牌');
+                } else {
+                    csrfToken = '{{ csrf_token }}';
+                    console.log('从模板变量获取CSRF令牌');
+                }
+                
+                if (!csrfToken) {
+                    console.error('错误: 无法获取CSRF令牌');
+                    alert('安全验证失败，请刷新页面重试');
+                    return;
+                }
+                
+                // 视觉反馈
+                btn.classList.add('processing');
+                
+                // 使用fetch API重新实现，可能更简洁可靠
+                fetch(`/posts/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `post_id=${postId}&csrfmiddlewaretoken=${csrfToken}`
+                })
+                .then(response => {
+                    console.log('收到服务器响应:', response.status, response.statusText);
+                    if (!response.ok) {
+                        throw new Error(`服务器返回错误: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('解析响应数据:', data);
+                    if (data.status === 'success') {
+                        // 更新点赞数
+                        likeCount.textContent = data.likes_count;
+                        console.log('更新点赞数为:', data.likes_count);
+                        
+                        // 更新点赞图标
+                        if (data.is_liked) {
+                            likeIcon.innerHTML = '<i class="fas fa-heart"></i>';
+                            btn.classList.add('liked');
+                            console.log('已点赞');
+                        } else {
+                            likeIcon.innerHTML = '<i class="far fa-heart"></i>';
+                            btn.classList.remove('liked');
+                            console.log('取消点赞');
+                        }
+                    } else {
+                        console.error('服务器返回错误:', data.message || '未知错误');
+                        alert('操作失败: ' + (data.message || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('点赞请求出错:', error);
+                    alert('点赞操作失败，请重试！');
+                })
+                .finally(() => {
+                    btn.classList.remove('processing');
+                });
+            });
+        });
+    });
+
+    // AJAX评论功能
+    console.log('加载AJAX评论功能...');
+    const commentForms = document.querySelectorAll('.comment-form');
+    console.log('找到', commentForms.length, '个评论表单');
+    
+    commentForms.forEach((form) => {
+        const postId = form.getAttribute('data-post-id');
+        console.log('初始化评论表单 - 帖子ID:', postId);
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const contentInput = this.querySelector('input[name="content"]');
+            const content = contentInput.value.trim();
+            
+            if (!content) {
+                alert('评论内容不能为空');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const commentSection = document.getElementById(`comment-section-${postId}`);
+            const recentComments = commentSection.querySelector('.recent-comments');
+            
+            // 显示加载状态
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            
+            // 获取CSRF令牌
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // 发送AJAX请求
+            fetch(`/posts/${postId}/comments/create/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => {
+                console.log('收到评论响应:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`服务器返回错误: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('评论成功:', data);
+                
+                // 清空输入框
+                contentInput.value = '';
+                
+                // 如果没有评论，清空"暂无评论"的提示
+                if (recentComments.querySelector('.text-center')) {
+                    recentComments.innerHTML = '';
+                }
+                
+                // 创建新评论元素
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item animate__animated animate__fadeIn';
+                
+                const avatarSrc = '{{ user.profile.avatar.url }}' || `https://ui-avatars.com/api/?name={{ user.username }}&background=random`;
+                const avatarHtml = '{{ user.profile.avatar }}' 
+                    ? `<img src="${avatarSrc}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">`
+                    : `<i class="fas fa-user-circle"></i>`;
+                
+                commentItem.innerHTML = `
+                    <div class="d-flex">
+                        <div class="avatar avatar-xs me-2">
+                            ${avatarHtml}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center">
+                                <strong class="me-2">{{ user.username }}</strong>
+                                <small class="post-time">刚刚</small>
+                            </div>
+                            <div>${data.content}</div>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加新评论到评论列表的最前面
+                recentComments.insertBefore(commentItem, recentComments.firstChild);
+                
+                // 更新评论计数
+                const commentCounter = document.querySelector(`button.interaction-btn[onclick="toggleCommentForm('${postId}')"] span`);
+                if (commentCounter) {
+                    commentCounter.textContent = data.comment_count;
+                }
+            })
+            .catch(error => {
+                console.error('评论提交失败:', error);
+                alert('评论提交失败，请重试');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="far fa-paper-plane"></i>';
+            });
+        });
+    });
+
+    function toggleCommentForm(postId) {
+        const commentSection = document.getElementById(`comment-section-${postId}`);
+        if (commentSection.style.display === 'none') {
+            // 先隐藏所有已打开的评论区
+            document.querySelectorAll('[id^="comment-section-"]').forEach(section => {
+                if (section.id !== `comment-section-${postId}`) {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // 显示当前评论区并添加动画
+            commentSection.style.display = 'block';
+            commentSection.classList.add('animate__animated', 'animate__fadeIn');
+            
+            // 聚焦到评论输入框
+            const inputField = commentSection.querySelector('input[name="content"]');
+            if (inputField) {
+                setTimeout(() => inputField.focus(), 300);
+            }
+        } else {
+            // 隐藏当前评论区
+            commentSection.classList.add('animate__fadeOut');
+            setTimeout(() => {
+                commentSection.style.display = 'none';
+                commentSection.classList.remove('animate__fadeOut');
+            }, 300);
+        }
+    }
+    
+    // 页面加载时给帖子添加动画延迟
+    document.addEventListener('DOMContentLoaded', function() {
+        const posts = document.querySelectorAll('.post-card');
+        posts.forEach((post, index) => {
+            const delay = (index % 5) * 0.1;
+            post.style.animationDelay = `${delay}s`;
+        });
+    });
+</script>
+{% endblock %} 

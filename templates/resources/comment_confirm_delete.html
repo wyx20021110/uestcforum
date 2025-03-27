@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}删除确认 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-confirm-container {
+        max-width: 650px;
+        margin: 30px auto 60px;
+    }
+    
+    .delete-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .delete-header {
+        background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+        padding: 2rem;
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .delete-header h2 {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .delete-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .delete-card .card-body {
+        padding: 2rem;
+    }
+    
+    .comment-info {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #f44336;
+        transition: all 0.3s;
+    }
+    
+    .comment-info:hover {
+        background-color: #f0f2f5;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .comment-content {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-style: italic;
+        padding: 10px;
+        background-color: white;
+        border-radius: 8px;
+        position: relative;
+    }
+    
+    .comment-content:before {
+        content: '\201C';
+        position: absolute;
+        top: -20px;
+        left: -5px;
+        font-size: 40px;
+        color: rgba(244, 67, 54, 0.2);
+        font-family: Georgia, serif;
+    }
+    
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #6c757d;
+    }
+    
+    .comment-meta-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .comment-meta-item i {
+        margin-right: 5px;
+    }
+    
+    .resource-link {
+        color: #4481eb;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .resource-link:hover {
+        color: #04befe;
+        text-decoration: underline;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    
+    .comment-author {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .author-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .warning-box {
+        background-color: rgba(244, 67, 54, 0.07);
+        border-left: 4px solid #f44336;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        transition: all 0.3s;
+    }
+    
+    .warning-box:hover {
+        background-color: rgba(244, 67, 54, 0.12);
+    }
+    
+    .warning-title {
+        display: flex;
+        align-items: center;
+        color: #f44336;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .warning-title i {
+        margin-right: 10px;
+        font-size: 1.25rem;
+    }
+    
+    .delete-btn {
+        background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .delete-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(244, 67, 54, 0.3);
+    }
+    
+    .cancel-btn {
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-3px);
+    }
+    
+    .rating {
+        display: flex;
+        margin: 10px 0;
+    }
+    
+    .rating .star {
+        color: #ffc107;
+        font-size: 1rem;
+        margin-right: 2px;
+    }
+    
+    .rating .empty-star {
+        color: #e0e0e0;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 767.98px) {
+        .delete-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .delete-header {
+            padding: 1.5rem;
+        }
+        
+        .comment-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-confirm-container">
+    <div class="delete-card card animate__animated animate__fadeIn">
+        <div class="delete-header">
+            <h2>
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                删除确认
+            </h2>
+            <p>您即将删除以下评论，此操作不可逆，请谨慎操作</p>
+        </div>
+        <div class="card-body">
+            <!-- 评论信息 -->
+            <div class="comment-info animate__animated animate__fadeInUp">
+                <div class="comment-author">
+                    <img src="{{ comment.user.profile.avatar.url|default:'/static/images/default-avatar.png' }}" alt="用户头像" class="user-avatar">
+                    <div>
+                        <div class="author-name">{{ comment.user.get_full_name|default:comment.user.username }}</div>
+                        <div class="rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= comment.rating %}
+                                    <div class="star"><i class="fas fa-star"></i></div>
+                                {% else %}
+                                    <div class="star empty-star"><i class="fas fa-star"></i></div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-content">
+                    {{ comment.content }}
+                </div>
+                
+                <div class="comment-meta">
+                    <div class="comment-meta-item">
+                        <i class="fas fa-calendar-alt"></i> 评论时间：{{ comment.create_time|date:"Y-m-d H:i" }}
+                    </div>
+                    <div class="comment-meta-item">
+                        <i class="fas fa-file-alt"></i> 所属资源：
+                        <a href="{% url 'resources:resource_detail' comment.resource.id %}" class="resource-link">
+                            {{ comment.resource.title }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 警告信息 -->
+            <div class="warning-box animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>删除警告</span>
+                </div>
+                <p class="mb-0">
+                    删除此评论是不可恢复的操作。删除后，此评论将不再显示在资源页面，
+                    且相关的评分计算也将相应调整。
+                </p>
+            </div>
+            
+            <!-- 确认表单 -->
+            <form method="post" class="animate__animated animate__fadeInUp animate__delay-2s">
+                {% csrf_token %}
+                
+                <!-- 按钮组 -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'resources:resource_detail' comment.resource.id %}" class="btn cancel-btn">
+                        <i class="fas fa-times me-2"></i>取消操作
+                    </a>
+                    <button type="submit" class="btn delete-btn">
+                        <i class="fas fa-trash-alt me-2"></i>确认删除
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

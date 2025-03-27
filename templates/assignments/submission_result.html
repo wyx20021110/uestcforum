@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}提交结果 - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ assignment.title }} - 提交结果</h2>
+            <p class="text-muted">
+                提交时间: {{ submission.submitted_at|date:"Y-m-d H:i" }}
+                {% if submission.is_late %}
+                    <span class="badge bg-warning">迟交</span>
+                {% endif %}
+            </p>
+            
+            {% if submission.is_graded %}
+                <div class="alert alert-info">
+                    <p class="mb-0">
+                        <strong>总分:</strong> 
+                        <span class="{% if submission.score >= assignment.total_score|floatformat:'0'|default:'0'|mul:0.6 %}text-success{% else %}text-danger{% endif %}">
+                            {{ submission.score }} / {{ assignment.total_score }}分
+                        </span>
+                    </p>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <p class="mb-0">当前状态: 教师尚未完成评分</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <h3 class="mt-4 mb-3">已提交的答案</h3>
+    
+    {% for question in assignment.questions.all %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">第{{ forloop.counter }}题：{{ question.content }}</h5>
+                <p class="text-muted">
+                    类型: {{ question.get_type_display }} | 
+                    分值: {{ question.score }}分
+                </p>
+                
+                <div class="mt-3">
+                    <h6>您的答案:</h6>
+                    {% with answer=answers|get_item:question.id %}
+                        {% if answer %}
+                            {% if question.type == 'text' %}
+                                <div class="p-3 bg-light rounded">
+                                    {{ answer.text_answer|linebreaks|default:"<em>未作答</em>" }}
+                                </div>
+                            {% else %}
+                                <div class="list-group">
+                                    {% for choice in answer.selected_choices.all %}
+                                        <div class="list-group-item">
+                                            {{ choice.content }}
+                                        </div>
+                                    {% empty %}
+                                        <p class="text-muted">未选择任何选项</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if submission.is_graded and answer.score is not None %}
+                                <div class="mt-2">
+                                    <strong>得分:</strong> 
+                                    <span class="{% if answer.score >= question.score|floatformat:'0'|mul:0.6 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ answer.score }} / {{ question.score }}分
+                                    </span>
+                                    
+                                    {% if answer.comment %}
+                                        <p class="mt-2">
+                                            <strong>评语:</strong><br>
+                                            {{ answer.comment|linebreaks }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">未作答</p>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                
+                {% if question.type != 'text' and submission.is_graded %}
+                    <div class="mt-3">
+                        <h6>正确答案:</h6>
+                        <div class="list-group">
+                            {% for choice in question.choices.all %}
+                                {% if choice.is_correct %}
+                                    <div class="list-group-item list-group-item-success">
+                                        {{ choice.content }}
+                                        <span class="badge bg-success float-end">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-info">
+            该作业没有题目
+        </div>
+    {% endfor %}
+    
+    <div class="d-grid gap-2 col-md-6 mx-auto mb-4">
+        <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> 返回作业
+        </a>
+    </div>
+</div>
+{% endblock %} 

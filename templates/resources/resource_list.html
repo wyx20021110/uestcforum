@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+
+{% block title %}教学资源 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resource-header {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        color: white;
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .resource-header h1 {
+        font-weight: 700;
+    }
+    
+    .resource-header p {
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .resource-sidebar {
+        position: sticky;
+        top: 80px;
+    }
+    
+    .category-card {
+        border-radius: 15px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+    }
+    
+    .category-card:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .category-card .card-header {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .category-link {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: #495057;
+        border-left: 3px solid transparent;
+        transition: all 0.2s;
+    }
+    
+    .category-link:hover {
+        background-color: #f8f9fa;
+        color: #2575fc;
+        border-left-color: #2575fc;
+        text-decoration: none;
+    }
+    
+    .category-link.active {
+        background-color: rgba(37, 117, 252, 0.05);
+        color: #2575fc;
+        border-left-color: #2575fc;
+        font-weight: 600;
+    }
+    
+    .category-link .badge {
+        transition: all 0.2s;
+    }
+    
+    .category-link:hover .badge {
+        background-color: #2575fc;
+        color: white;
+    }
+    
+    .resource-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .resource-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .resource-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .resource-card .card-title {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1.25rem;
+    }
+    
+    .resource-card .resource-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .resource-card .resource-category {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        background-color: rgba(37, 117, 252, 0.1);
+        color: #2575fc;
+        margin-right: 1rem;
+        font-weight: 500;
+    }
+    
+    .resource-card .resource-uploader {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .resource-card .card-text {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        height: 3rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .resource-card .resource-stats {
+        display: flex;
+        align-items: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .resource-card .resource-stats div {
+        margin-right: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .resource-card .resource-stats i {
+        margin-right: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .resource-card .card-footer {
+        background-color: #f8f9fa;
+        border-top: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .download-btn {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+    }
+    
+    .download-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    .resource-search {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .resource-search input {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        padding-right: 3rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .resource-search input:focus {
+        box-shadow: 0 5px 20px rgba(37, 117, 252, 0.15);
+    }
+    
+    .resource-search button {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        border: none;
+    }
+    
+    .upload-btn {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        transition: all 0.3s;
+        color: white;
+    }
+    
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(56, 239, 125, 0.3);
+        color: white;
+    }
+    
+    .upload-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    .pagination {
+        margin-top: 2rem;
+        justify-content: center;
+    }
+    
+    .pagination .page-item .page-link {
+        border: none;
+        margin: 0 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #495057;
+        transition: all 0.3s;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        color: white;
+        box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+    }
+    
+    .pagination .page-item .page-link:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    
+    .pagination .page-item.active .page-link:hover {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+    }
+    
+    .empty-resources {
+        text-align: center;
+        padding: 3rem 0;
+    }
+    
+    .empty-resources i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-resources h4 {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+    
+    .empty-resources p {
+        color: #6c757d;
+        max-width: 500px;
+        margin: 0 auto 1.5rem;
+    }
+    
+    @media (max-width: 991.98px) {
+        .resource-sidebar {
+            position: static;
+            margin-bottom: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 资源页面标题头部 -->
+<div class="resource-header text-center animate__animated animate__fadeIn">
+    <div class="container">
+        <h1 class="mb-3">教学资源中心</h1>
+        <p class="lead">发现和分享高质量的学习资源，帮助你更好地学习和成长。</p>
+        {% if user.is_authenticated and user.role == 'T' %}
+        <a href="{% url 'resources:resource_upload' %}" class="btn upload-btn mt-3 animate__animated animate__fadeInUp animate__delay-1s">
+            <i class="fas fa-upload"></i> 上传资源
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- 左侧分类侧边栏 -->
+        <div class="col-lg-3">
+            <div class="resource-sidebar animate__animated animate__fadeInLeft">
+                <!-- 搜索框 -->
+                <div class="resource-search">
+                    <form method="get" action="{% url 'resources:resource_list' %}">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="搜索资源..." value="{{ request.GET.q|default:'' }}">
+                            <button class="btn" type="submit"><i class="fas fa-search text-white"></i></button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 分类列表 -->
+                <div class="category-card card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-tags me-2"></i> 资源分类
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'resources:resource_list' %}" class="category-link {% if not category %}active{% endif %}">
+                            全部资源
+                            <span class="badge bg-light text-dark float-end">{{ resource_count }}</span>
+                        </a>
+                        {% for cat in categories %}
+                        <a href="{% url 'resources:resource_list_by_category' cat.slug %}" class="category-link {% if category.slug == cat.slug %}active{% endif %}">
+                            {{ cat.name }}
+                            <span class="badge bg-light text-dark float-end">{{ cat.resources.count }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- 上传统计卡片 -->
+                {% if top_uploaders %}
+                <div class="category-card card">
+                    <div class="card-header">
+                        <i class="fas fa-crown me-2"></i> 上传排行
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for uploader in top_uploaders %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-user-circle me-2 text-primary"></i>
+                                {{ uploader.username }}
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ uploader.resource_count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 右侧资源列表 -->
+        <div class="col-lg-9">
+            {% if category %}
+            <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+                <h2 class="mb-0">{{ category.name }}</h2>
+                <span class="badge bg-primary">{{ resources.count }} 个资源</span>
+            </div>
+            {% endif %}
+            
+            <div class="row">
+                {% if resources %}
+                    {% for resource in resources %}
+                    <div class="col-md-6 col-lg-4 mb-4 animate__animated animate__fadeInUp" style="animation-delay: {{ forloop.counter|divisibleby:3 }}00ms">
+                        <div class="resource-card card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate">
+                                    <a href="{% url 'resources:resource_detail' resource.id %}" class="text-decoration-none text-dark">
+                                        {{ resource.title }}
+                                    </a>
+                                </h5>
+                                <div class="resource-meta">
+                                    <div class="resource-category">{{ resource.category.name }}</div>
+                                    <div class="resource-uploader">
+                                        <i class="fas fa-user-circle me-1"></i>{{ resource.uploader.username }}
+                                    </div>
+                                </div>
+                                <p class="card-text">{{ resource.description|truncatewords:15 }}</p>
+                                <div class="resource-stats">
+                                    <div>
+                                        <i class="fas fa-download text-primary"></i>
+                                        {{ resource.download_count }}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-heart text-danger"></i>
+                                        {{ resource.likes.count }}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-calendar-alt text-info"></i>
+                                        {{ resource.upload_time|date:"Y-m-d" }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <a href="{% url 'resources:resource_detail' resource.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-info-circle"></i> 详情
+                                </a>
+                                <a href="{% url 'resources:resource_download' resource.id %}" class="btn btn-sm download-btn">
+                                    <i class="fas fa-download"></i> 下载
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="empty-resources animate__animated animate__fadeIn">
+                            <i class="fas fa-folder-open"></i>
+                            <h4>暂无资源</h4>
+                            <p class="text-muted">当前分类下还没有资源，请查看其他分类或稍后再来查看。</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- 分页导航 -->
+            {% if resources and resources.paginator.num_pages > 1 %}
+            <nav aria-label="资源分页" class="mt-4">
+                <ul class="pagination">
+                    {% if resources.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="First">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ resources.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Previous">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in resources.paginator.page_range %}
+                        {% if resources.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > resources.number|add:'-3' and num < resources.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if resources.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ resources.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Next">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ resources.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Last">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

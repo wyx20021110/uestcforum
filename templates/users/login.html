@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}登录 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+    
+    .login-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .login-card .card-body {
+        padding: 40px;
+    }
+    
+    .login-card .card-title {
+        font-weight: 700;
+        color: #2980b9;
+        margin-bottom: 30px;
+    }
+    
+    .login-form .form-control {
+        height: 50px;
+        border-radius: 8px;
+        padding-left: 15px;
+        font-size: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .login-form .form-control:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        border-color: #3498db;
+    }
+    
+    .login-form .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .login-btn {
+        height: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
+        background: linear-gradient(135deg, #2980b9 0%, #1c6ca1 100%);
+    }
+    
+    .login-link {
+        color: #3498db;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .login-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+    }
+    
+    .login-divider {
+        margin: 30px 0;
+        color: #adb5bd;
+    }
+    
+    .login-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #3498db;
+        font-size: 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .login-icon:hover {
+        background-color: #3498db;
+        color: white;
+        transform: translateY(-3px);
+    }
+    
+    .login-page-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        z-index: -1;
+        border-bottom-left-radius: 50% 20%;
+        border-bottom-right-radius: 50% 20%;
+    }
+    
+    @media (max-width: 768px) {
+        .login-card .card-body {
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-page-bg"></div>
+<div class="container login-container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="text-center mb-4 animate__animated animate__fadeInDown">
+                <h2 class="text-white">欢迎回来</h2>
+                <p class="text-white-50">请登录您的账号以继续</p>
+            </div>
+            <div class="login-card card animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <h3 class="card-title text-center">
+                        <i class="fas fa-user-circle me-2"></i>用户登录
+                    </h3>
+                    <form method="post" action="{% url 'users:login' %}" class="login-form">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-2"></i>用户名
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="请输入您的用户名" required autocomplete="username">
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>密码
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="请输入您的密码" required autocomplete="current-password">
+                            <div class="text-end mt-1">
+                                <small><a href="#" class="login-link">忘记密码?</a></small>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary login-btn">
+                                <i class="fas fa-sign-in-alt me-2"></i>登录
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">还没有账号？ <a href="{% url 'users:register' %}" class="login-link">立即注册</a></p>
+                    </div>
+                    
+                    <div class="login-divider text-center">
+                        <span>或</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center">
+                        <a href="#" class="login-icon">
+                            <i class="fab fa-weixin"></i>
+                        </a>
+                        <a href="#" class="login-icon">
+                            <i class="fab fa-qq"></i>
+                        </a>
+                        <a href="#" class="login-icon">
+                            <i class="fab fa-weibo"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

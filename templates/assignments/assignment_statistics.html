@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load assignment_filters %}
+
+{% block title %}评分统计 - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h2 class="card-title">{{ assignment.title }} - 评分统计</h2>
+                    <p class="text-muted mb-0">
+                        <span class="me-3">
+                            <i class="fas fa-user"></i> {{ assignment.teacher.username }}
+                        </span>
+                        <span class="me-3">
+                            <i class="fas fa-calendar"></i> {{ assignment.start_time|date:"Y-m-d" }} 至 {{ assignment.end_time|date:"Y-m-d" }}
+                        </span>
+                        <span class="badge {% if assignment.type == 'assignment' %}bg-primary{% else %}bg-danger{% endif %}">
+                            {{ assignment.get_type_display }}
+                        </span>
+                    </p>
+                </div>
+                <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回作业
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 数据概览 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">提交情况</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>总学生数：</span>
+                        <strong>{{ stats.total_submissions|add:stats.not_submitted_count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>已提交数：</span>
+                        <strong>{{ stats.total_submissions }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>已评分数：</span>
+                        <strong>{{ stats.graded_count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>待评分数：</span>
+                        <strong>{{ stats.pending_count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>未提交数：</span>
+                        <strong>{{ stats.not_submitted_count }}</strong>
+                    </div>
+                    
+                    <!-- 进度条 -->
+                    <h6 class="mt-3">提交完成率</h6>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ stats.completion_rate }}%;" 
+                             aria-valuenow="{{ stats.completion_rate }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ stats.completion_rate|floatformat:1 }}%
+                        </div>
+                    </div>
+                    
+                    <h6>评分进度</h6>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ stats.grading_progress }}%;" 
+                             aria-valuenow="{{ stats.grading_progress }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ stats.grading_progress|floatformat:1 }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">成绩统计</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>平均分：</span>
+                        <strong>{{ stats.avg_score|floatformat:1 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>最高分：</span>
+                        <strong>{{ stats.max_score|floatformat:1 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>最低分：</span>
+                        <strong>{{ stats.min_score|floatformat:1 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>及格率：</span>
+                        <strong>{{ stats.pass_rate|floatformat:1 }}%</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>满分总分：</span>
+                        <strong>{{ assignment.total_score }}</strong>
+                    </div>
+                    
+                    <!-- 及格率进度条 -->
+                    <h6 class="mt-3">及格率</h6>
+                    <div class="progress">
+                        <div class="progress-bar {% if stats.pass_rate >= 80 %}bg-success{% elif stats.pass_rate >= 60 %}bg-info{% elif stats.pass_rate >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             role="progressbar" style="width: {{ stats.pass_rate }}%;" 
+                             aria-valuenow="{{ stats.pass_rate }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ stats.pass_rate|floatformat:1 }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">正确率分布</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>90%-100%：</span>
+                        <div>
+                            <strong>{{ stats.score_distribution.excellent }}</strong>
+                            <div class="progress" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {% widthratio stats.score_distribution.excellent stats.graded_count 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>80%-89%：</span>
+                        <div>
+                            <strong>{{ stats.score_distribution.good }}</strong>
+                            <div class="progress" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     style="width: {% widthratio stats.score_distribution.good stats.graded_count 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>70%-79%：</span>
+                        <div>
+                            <strong>{{ stats.score_distribution.average }}</strong>
+                            <div class="progress" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     style="width: {% widthratio stats.score_distribution.average stats.graded_count 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>60%-69%：</span>
+                        <div>
+                            <strong>{{ stats.score_distribution.passing }}</strong>
+                            <div class="progress" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {% widthratio stats.score_distribution.passing stats.graded_count 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>0%-59%：</span>
+                        <div>
+                            <strong>{{ stats.score_distribution.failing }}</strong>
+                            <div class="progress" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                     style="width: {% widthratio stats.score_distribution.failing stats.graded_count 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 题目难度分析 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">题目难度分析</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>题号</th>
+                            <th>题目内容</th>
+                            <th>题型</th>
+                            <th>满分</th>
+                            <th>平均得分</th>
+                            <th>难度等级</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q_stat in question_stats %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ q_stat.question.content|truncatechars:50 }}</td>
+                            <td>{{ q_stat.question.get_type_display }}</td>
+                            <td>{{ q_stat.question.score }}</td>
+                            <td>{{ q_stat.avg_score|floatformat:1 }}</td>
+                            <td>
+                                <span class="badge {% if q_stat.difficulty < 0.3 %}bg-success{% elif q_stat.difficulty < 0.7 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ q_stat.difficulty_level }}
+                                </span>
+                                <div class="progress mt-1" style="height: 5px;">
+                                    <div class="progress-bar {% if q_stat.difficulty < 0.3 %}bg-success{% elif q_stat.difficulty < 0.7 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" style="width: {{ q_stat.difficulty|multiply:100 }}%;">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">暂无评分数据</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 学生得分排名 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">学生得分排名</h5>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>学生</th>
+                            <th>得分</th>
+                            <th>得分率</th>
+                            <th>提交时间</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in student_data %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ data.student.username }}</td>
+                            <td>{{ data.score }}</td>
+                            <td>
+                                {{ data.score|floatformat:1 }} / {{ assignment.total_score }}
+                                ({{ data.score|multiply:100|divide:assignment.total_score|floatformat:1 }}%)
+                                <div class="progress mt-1" style="height: 5px;">
+                                    <div class="progress-bar {% if data.score >= assignment.total_score|multiply:0.9 %}bg-success{% elif data.score >= assignment.total_score|multiply:0.6 %}bg-info{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" style="width: {{ data.score|multiply:100|divide:assignment.total_score }}%;">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ data.submitted_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if data.is_late %}
+                                <span class="badge bg-warning">迟交</span>
+                                {% else %}
+                                <span class="badge bg-success">按时</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">暂无学生提交数据</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 这里可以添加图表相关的JavaScript
+    });
+</script>
+{% endblock %} 

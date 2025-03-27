@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}批改作业 - {{ submission.student.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h2 class="card-title">批改作业</h2>
+                    <p class="text-muted mb-0">
+                        <span class="me-3">
+                            <i class="fas fa-book"></i> {{ submission.assignment.title }}
+                        </span>
+                        <span class="me-3">
+                            <i class="fas fa-user"></i> {{ submission.student.username }}
+                        </span>
+                        <span class="me-3">
+                            <i class="fas fa-clock"></i> {{ submission.submitted_at|date:"Y-m-d H:i" }}
+                        </span>
+                        {% if submission.submitted_at > submission.assignment.end_time %}
+                            <span class="badge bg-warning">迟交</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'assignments:assignment_detail' submission.assignment.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回作业
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">学生提交作业评分</h5>
+                
+                <!-- 显示选择题自动评分情况 -->
+                <div class="mb-4">
+                    <h6>选择题评分情况</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>题目</th>
+                                <th>类型</th>
+                                <th>满分</th>
+                                <th>自动评分</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for answer in submission.answers.all %}
+                                {% if answer.question.type != 'text' %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ answer.question.content|truncatechars:50 }}</td>
+                                    <td>{{ answer.question.get_type_display }}</td>
+                                    <td>{{ answer.question.score }}分</td>
+                                    <td>
+                                        {% if answer.score is not None %}
+                                            <span class="{% if answer.score >= answer.question.score %}text-success{% else %}text-danger{% endif %}">
+                                                {{ answer.score }}分
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">未评分</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input toggle-manual-score" 
+                                                   type="checkbox" 
+                                                   id="override_{{ answer.id }}" 
+                                                   name="override_score_{{ answer.id }}"
+                                                   value="1"
+                                                   data-target="manual_score_{{ answer.id }}">
+                                            <label class="form-check-label" for="override_{{ answer.id }}">手动评分</label>
+                                        </div>
+                                        <div class="manual-score-input" id="manual_score_{{ answer.id }}_container" style="display:none">
+                                            <div class="input-group mt-2">
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="manual_score_{{ answer.id }}" 
+                                                       name="manual_score_{{ answer.id }}" 
+                                                       min="0" 
+                                                       max="{{ answer.question.score }}" 
+                                                       step="0.5"
+                                                       value="{{ answer.score|default_if_none:'' }}">
+                                                <span class="input-group-text">分</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 学生答案与评分表单 -->
+                {% for answer, form in forms %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            第{{ forloop.counter }}题 
+                            <span class="badge bg-secondary">{{ answer.question.get_type_display }}</span>
+                            <span class="badge bg-info">{{ answer.question.score }}分</span>
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <p><strong>题目内容：</strong></p>
+                            <p>{{ answer.question.content|linebreaks }}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p><strong>学生答案：</strong></p>
+                            <div class="border p-3 bg-light">
+                                {{ answer.text_answer|linebreaks|default:"<em>未作答</em>" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.score.id_for_label }}" class="form-label">评分 (满分{{ answer.question.score }}分)：</label>
+                                    {{ form.score }}
+                                    {% if form.score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.score.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.comment.id_for_label }}" class="form-label">评语：</label>
+                                    {{ form.comment }}
+                                    {% if form.comment.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.comment.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    没有需要手动评分的简答题。
+                </div>
+                {% endfor %}
+                
+                <!-- 整体评语 -->
+                <div class="mb-4">
+                    <label for="feedback" class="form-label">整体评语：</label>
+                    <textarea class="form-control" id="feedback" name="feedback" rows="3">{{ submission.feedback|default:'' }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 保存评分
+                </button>
+                <a href="{% url 'assignments:assignment_detail' submission.assignment.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> 取消
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 手动评分切换
+    const toggleButtons = document.querySelectorAll('.toggle-manual-score');
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('change', function() {
+            const targetId = this.getAttribute('data-target');
+            const container = document.getElementById(targetId + '_container');
+            container.style.display = this.checked ? 'block' : 'none';
+            
+            // 清除输入框值或恢复原始值
+            const input = document.getElementById(targetId);
+            if (!this.checked) {
+                input.value = '';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

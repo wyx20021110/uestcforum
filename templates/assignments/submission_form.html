@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}提交{{ assignment.get_type_display }} - {{ assignment.title }} - 高校师生互动交流平台{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'assignments:assignment_list' %}">作业/考试</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'assignments:assignment_detail' assignment.pk %}">{{ assignment.title }}</a></li>
+                    <li class="breadcrumb-item active">提交{{ assignment.get_type_display }}</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">提交{{ assignment.get_type_display }}</h2>
+                    
+                    {% if not assignment.is_active %}
+                        <div class="alert alert-warning">
+                            {% if assignment.is_upcoming %}
+                                该{{ assignment.get_type_display }}还未开始，开始时间：{{ assignment.start_time|date:"Y-m-d H:i" }}
+                            {% else %}
+                                该{{ assignment.get_type_display }}已结束，截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-clock"></i> 截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
+                        </div>
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if assignment.type == 'exam' %}
+                                {% for question in assignment.questions.all %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                第{{ forloop.counter }}题
+                                                <span class="float-end text-muted">
+                                                    ({{ question.score }}分)
+                                                </span>
+                                            </h5>
+                                            <p class="card-text">{{ question.content }}</p>
+                                            
+                                            {% if question.type == 'choice' %}
+                                                <div class="list-group">
+                                                    {% for choice in question.choices.all %}
+                                                        <label class="list-group-item">
+                                                            <input type="radio" name="answer_{{ question.id }}" value="{{ choice.id }}" class="form-check-input me-2" required>
+                                                            {{ choice.content }}
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <div class="mb-3">
+                                                    <textarea name="answer_{{ question.id }}" class="form-control" rows="3" required></textarea>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="mb-3">
+                                    <label for="{{ form.content.id_for_label }}" class="form-label">作业内容</label>
+                                    {{ form.content }}
+                                    {% if form.content.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.content.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.attachments.id_for_label }}" class="form-label">
+                                        附件
+                                        <small class="text-muted">(可选)</small>
+                                    </label>
+                                    {{ form.attachments }}
+                                    {% if form.attachments.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.attachments.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">支持上传多个文件，总大小不超过20MB</div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    提交{{ assignment.get_type_display }}
+                                </button>
+                                <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-outline-secondary">
+                                    取消
+                                </a>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

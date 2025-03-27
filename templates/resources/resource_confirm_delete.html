@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}删除确认 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-confirm-container {
+        max-width: 650px;
+        margin: 30px auto 60px;
+    }
+    
+    .delete-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .delete-header {
+        background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+        padding: 2rem;
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .delete-header h2 {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .delete-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .delete-card .card-body {
+        padding: 2rem;
+    }
+    
+    .resource-info {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #f44336;
+        transition: all 0.3s;
+    }
+    
+    .resource-info:hover {
+        background-color: #f0f2f5;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .resource-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .resource-category {
+        display: inline-block;
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .resource-uploader {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .resource-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 10px;
+        color: #6c757d;
+    }
+    
+    .resource-meta-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .resource-meta-item i {
+        margin-right: 5px;
+    }
+    
+    .warning-box {
+        background-color: rgba(244, 67, 54, 0.07);
+        border-left: 4px solid #f44336;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        transition: all 0.3s;
+    }
+    
+    .warning-box:hover {
+        background-color: rgba(244, 67, 54, 0.12);
+    }
+    
+    .warning-title {
+        display: flex;
+        align-items: center;
+        color: #f44336;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .warning-title i {
+        margin-right: 10px;
+        font-size: 1.25rem;
+    }
+    
+    .delete-btn {
+        background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .delete-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(244, 67, 54, 0.3);
+    }
+    
+    .cancel-btn {
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-3px);
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 767.98px) {
+        .delete-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .delete-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-confirm-container">
+    <div class="delete-card card animate__animated animate__fadeIn">
+        <div class="delete-header">
+            <h2>
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                删除确认
+            </h2>
+            <p>您即将删除以下教学资源，此操作不可逆，请谨慎操作</p>
+        </div>
+        <div class="card-body">
+            <!-- 资源信息 -->
+            <div class="resource-info animate__animated animate__fadeInUp">
+                <h5 class="resource-title">
+                    <i class="fas fa-file-alt me-2 text-danger"></i>
+                    {{ object.title }}
+                </h5>
+                <span class="resource-category">{{ object.category }}</span>
+                <div class="resource-uploader mt-2">
+                    <i class="fas fa-user me-1"></i> 上传者：{{ object.uploader.get_full_name|default:object.uploader.username }}
+                </div>
+                <div class="resource-meta">
+                    <div class="resource-meta-item">
+                        <i class="fas fa-calendar-alt"></i> 上传时间：{{ object.upload_time|date:"Y-m-d H:i" }}
+                    </div>
+                    <div class="resource-meta-item">
+                        <i class="fas fa-download"></i> 下载次数：{{ object.download_count }}
+                    </div>
+                    <div class="resource-meta-item">
+                        <i class="fas fa-comments"></i> 评论数：{{ object.comments.count }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 警告信息 -->
+            <div class="warning-box animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>删除警告</span>
+                </div>
+                <p class="mb-0">
+                    删除此资源将会同时删除所有与之相关的评论和下载记录。此操作<strong>不可恢复</strong>，
+                    所有学生将无法再访问此资源。
+                </p>
+            </div>
+            
+            <!-- 确认表单 -->
+            <form method="post" class="animate__animated animate__fadeInUp animate__delay-2s">
+                {% csrf_token %}
+                
+                <!-- 按钮组 -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'resources:resource_detail' object.id %}" class="btn cancel-btn">
+                        <i class="fas fa-times me-2"></i>取消操作
+                    </a>
+                    <button type="submit" class="btn delete-btn">
+                        <i class="fas fa-trash-alt me-2"></i>确认删除
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}聊天帮助 | 教育平台{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">聊天功能使用指南</h3>
+        </div>
+        <div class="card-body">
+            <h4 class="mb-3">概述</h4>
+            <p>
+                本平台的聊天功能允许学生与教师之间、学生与学生之间进行即时通讯，支持私聊和群聊两种方式。
+                您可以通过聊天功能讨论课程内容、作业问题或其他学习相关话题。
+            </p>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">如何开始私聊</h4>
+            <ol>
+                <li>点击导航栏中的"聊天"选项进入聊天页面</li>
+                <li>在"可聊天的用户"列表中找到您想聊天的人</li>
+                <li>点击该用户，系统会自动创建一个私聊会话并跳转到聊天界面</li>
+                <li>在聊天输入框中输入消息，按回车键或点击发送按钮发送消息</li>
+            </ol>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">如何创建群聊</h4>
+            <ol>
+                <li>进入聊天页面后，点击"新建群组"按钮</li>
+                <li>在弹出的窗口中输入群组名称（必填）和描述（可选）</li>
+                <li>从用户列表中选择要添加到群组的成员（可多选）</li>
+                <li>点击"创建群组"按钮完成创建</li>
+            </ol>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">聊天室功能</h4>
+            <ul>
+                <li><strong>消息历史</strong>：进入聊天室后会自动加载最近50条消息</li>
+                <li><strong>已读状态</strong>：消息发送后，对方读取时会自动标记为已读</li>
+                <li><strong>未读计数</strong>：导航栏中的聊天链接会显示未读消息数量</li>
+            </ul>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">注意事项</h4>
+            <ul>
+                <li>请遵守平台规定，不发布不适当的内容</li>
+                <li>保持礼貌和尊重，营造良好的交流环境</li>
+                <li>如发现平台故障，请及时联系管理员</li>
+            </ul>
+
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                更多问题或建议，请联系平台管理员或查阅平台帮助文档。
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

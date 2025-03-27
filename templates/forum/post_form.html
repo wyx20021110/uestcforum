@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if post %}编辑动态{% else %}发布新动态{% endif %} - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .attachment-preview {
+        position: relative;
+        margin-bottom: 10px;
+    }
+    .attachment-preview img {
+        max-height: 150px;
+        object-fit: cover;
+    }
+    .delete-attachment {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: rgba(255,255,255,0.8);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card post-card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    {% if post %}编辑动态{% else %}分享新动态{% endif %}
+                </h3>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.title.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.content.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.attachments.id_for_label }}" class="form-label d-flex align-items-center">
+                            <i class="fas fa-image me-2"></i> {{ form.attachments.label }}
+                        </label>
+                        <input type="file" name="attachments" class="form-control" id="{{ form.attachments.id_for_label }}" multiple>
+                        <div class="form-text">支持图片、文档等各种格式文件，可选择多个文件</div>
+                    </div>
+                    
+                    {% if post.attachments.exists %}
+                        <div class="mb-4">
+                            <h6 class="mb-3">已上传文件：</h6>
+                            <div class="row">
+                                {% for attachment in post.attachments.all %}
+                                    <div class="col-md-4 col-6">
+                                        <div class="attachment-preview">
+                                            {% with file_extension=attachment.filename|lower %}
+                                                {% if '.jpg' in file_extension or '.jpeg' in file_extension or '.png' in file_extension or '.gif' in file_extension %}
+                                                    <img src="{{ attachment.file.url }}" alt="{{ attachment.filename }}" class="img-fluid rounded">
+                                                {% else %}
+                                                    <div class="p-3 border rounded text-center">
+                                                        <i class="fas fa-file fa-2x mb-2"></i>
+                                                        <div class="small text-truncate">{{ attachment.filename }}</div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                            <a href="{% url 'forum:attachment_delete' attachment.id %}" 
+                                                class="btn btn-sm btn-light delete-attachment"
+                                                onclick="return confirm('确定要删除这个文件吗？')">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'forum:post_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-arrow-left me-2"></i> 返回
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-paper-plane me-2"></i> {% if post %}保存修改{% else %}发布动态{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 文本编辑器增强
+    $('#id_content').on('keydown', function(e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+        }
+    });
+    
+    // 预览上传的图片
+    $('#id_attachments').on('change', function() {
+        console.log("Files selected");
+    });
+});
+</script>
+{% endblock %} 

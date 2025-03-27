@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+
+{% block title %}添加评论 - 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comment-form-container {
+        max-width: 800px;
+        margin: 30px auto 60px;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        padding: 2rem;
+        border-radius: 15px 15px 0 0;
+        color: white;
+    }
+    
+    .form-header h2 {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .form-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .form-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-card .card-body {
+        padding: 2rem;
+    }
+    
+    .resource-info {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #4481eb;
+        transition: all 0.3s;
+    }
+    
+    .resource-info:hover {
+        background-color: #f0f2f5;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .resource-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .resource-category {
+        display: inline-block;
+        background-color: rgba(68, 129, 235, 0.1);
+        color: #4481eb;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .resource-uploader {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .comment-section {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        color: #2c3e50;
+    }
+    
+    .section-title i {
+        margin-right: 10px;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #4481eb;
+        box-shadow: 0 0 0 3px rgba(68, 129, 235, 0.2);
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(68, 129, 235, 0.3);
+    }
+    
+    .cancel-btn {
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-3px);
+    }
+    
+    .error-feedback {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .rating-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .rating-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    
+    .rating-stars input {
+        display: none;
+    }
+    
+    .rating-stars label {
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        margin-right: 5px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #e0e0e0;
+        font-size: 1.5rem;
+        transition: all 0.2s;
+    }
+    
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label,
+    .rating-stars input:checked ~ label {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 767.98px) {
+        .form-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comment-form-container">
+    <div class="form-card card animate__animated animate__fadeIn">
+        <div class="form-header">
+            <h2>添加评论</h2>
+            <p>分享您对这份资源的看法或建议，帮助其他学生更好地了解这份资源</p>
+        </div>
+        <div class="card-body">
+            {% if form.errors %}
+            <div class="error-feedback animate__animated animate__headShake">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>提交出错：</strong>
+                <ul class="mb-0 mt-2">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <!-- 资源信息 -->
+            <div class="resource-info animate__animated animate__fadeInUp">
+                <h5 class="resource-title">
+                    <i class="fas fa-file-alt me-2 text-primary"></i>
+                    {{ resource.title }}
+                </h5>
+                <span class="resource-category">{{ resource.category }}</span>
+                <div class="resource-uploader mt-2">
+                    <i class="fas fa-user me-1"></i> 上传者：{{ resource.uploader.get_full_name|default:resource.uploader.username }}
+                </div>
+            </div>
+            
+            <form method="post" id="comment-form">
+                {% csrf_token %}
+                
+                <!-- 评分部分 -->
+                <div class="comment-section animate__animated animate__fadeInUp animate__delay-1s">
+                    <h3 class="section-title">
+                        <i class="fas fa-star"></i> 评分
+                    </h3>
+                    
+                    <div class="rating-container">
+                        <div class="rating-stars">
+                            <input type="radio" id="star5" name="rating" value="5" {% if form.initial.rating == 5 %}checked{% endif %}>
+                            <label for="star5"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star4" name="rating" value="4" {% if form.initial.rating == 4 %}checked{% endif %}>
+                            <label for="star4"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star3" name="rating" value="3" {% if form.initial.rating == 3 or not form.initial.rating %}checked{% endif %}>
+                            <label for="star3"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star2" name="rating" value="2" {% if form.initial.rating == 2 %}checked{% endif %}>
+                            <label for="star2"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star1" name="rating" value="1" {% if form.initial.rating == 1 %}checked{% endif %}>
+                            <label for="star1"><i class="fas fa-star"></i></label>
+                        </div>
+                        <div class="form-text mt-2">
+                            选择星级评分，1星为最低评分，5星为最高评分
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评论内容 -->
+                <div class="comment-section animate__animated animate__fadeInUp animate__delay-2s">
+                    <h3 class="section-title">
+                        <i class="fas fa-comment"></i> 评论内容
+                    </h3>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">评论内容</label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                            <div class="invalid-feedback">{{ form.content.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            分享您的想法和建议，帮助其他学习者更好地了解这份资源
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 按钮组 -->
+                <div class="d-flex justify-content-between mt-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <a href="{% url 'resources:resource_detail' resource.id %}" class="btn cancel-btn">
+                        <i class="fas fa-arrow-left me-2"></i>返回资源
+                    </a>
+                    <button type="submit" class="btn submit-btn">
+                        <i class="fas fa-paper-plane me-2"></i>发表评论
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 美化表单控件
+        const contentTextarea = document.getElementById('{{ form.content.id_for_label }}');
+        if (contentTextarea) {
+            contentTextarea.classList.add('form-control');
+            contentTextarea.placeholder = '请输入您对此资源的评价和建议...';
+            contentTextarea.rows = 5;
+        }
+        
+        // 星级评分交互
+        const ratingLabels = document.querySelectorAll('.rating-stars label');
+        const ratingDescription = document.createElement('div');
+        ratingDescription.className = 'mt-2 text-primary fw-bold';
+        document.querySelector('.rating-container').appendChild(ratingDescription);
+        
+        const ratingTexts = {
+            1: '不推荐 - 内容质量较差',
+            2: '一般 - 有一定参考价值',
+            3: '良好 - 内容有用',
+            4: '推荐 - 高质量资源',
+            5: '强烈推荐 - 极其有用的优质资源'
+        };
+        
+        // 初始化评分描述
+        updateRatingDescription();
+        
+        // 评分变化时更新描述
+        document.querySelectorAll('.rating-stars input').forEach(input => {
+            input.addEventListener('change', function() {
+                updateRatingDescription();
+            });
+        });
+        
+        function updateRatingDescription() {
+            const checkedInput = document.querySelector('.rating-stars input:checked');
+            if (checkedInput) {
+                const rating = parseInt(checkedInput.value);
+                ratingDescription.textContent = ratingTexts[rating];
+            } else {
+                ratingDescription.textContent = ratingTexts[3]; // 默认3星
+            }
+        }
+        
+        // 表单提交前验证
+        const commentForm = document.getElementById('comment-form');
+        commentForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // 验证评论内容
+            if (!contentTextarea.value.trim()) {
+                isValid = false;
+                contentTextarea.classList.add('is-invalid');
+                
+                if (!contentTextarea.nextElementSibling || !contentTextarea.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const invalidFeedback = document.createElement('div');
+                    invalidFeedback.className = 'invalid-feedback';
+                    invalidFeedback.textContent = '请输入评论内容';
+                    contentTextarea.parentNode.insertBefore(invalidFeedback, contentTextarea.nextSibling);
+                }
+            } else {
+                contentTextarea.classList.remove('is-invalid');
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %} 

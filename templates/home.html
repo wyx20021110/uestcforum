@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}主页{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        color: white;
+        padding: 80px 0;
+        border-radius: 15px;
+        margin-bottom: 40px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .hero-section p {
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto 30px;
+    }
+    
+    .feature-card {
+        height: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    
+    .feature-card .card-body {
+        padding: 30px;
+    }
+    
+    .feature-card .card-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #3498db;
+    }
+    
+    .btn-get-started {
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 30px;
+        background-color: #fff;
+        color: #3498db;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-get-started:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        background-color: #f8f9fa;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 50px 20px;
+        }
+        
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 英雄区域 -->
+<section class="hero-section text-center animate__animated animate__fadeIn">
+    <div class="container">
+        <h1 class="display-4">欢迎来到高校师生互动交流平台</h1>
+        <p class="lead">连接师生，分享知识，共同成长</p>
+        <a href="{% url 'forum:post_list' %}" class="btn btn-get-started">开始探索</a>
+    </div>
+</section>
+
+<!-- 功能特性区域 -->
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="feature-card card animate-on-scroll invisible">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h5 class="card-title">作业管理</h5>
+                    <p class="card-text">便捷提交作业，及时获取教师反馈，追踪学习进度，实现高效学习管理。</p>
+                    <a href="{% url 'assignments:assignment_list' %}" class="btn btn-primary mt-3">进入作业</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card card animate-on-scroll invisible">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h5 class="card-title">学习资源</h5>
+                    <p class="card-text">丰富的课程资料库，提供各类学习材料，支持在线预览和下载，助力学习成长。</p>
+                    <a href="{% url 'resources:resource_list' %}" class="btn btn-primary mt-3">查看资源</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card card animate-on-scroll invisible">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h5 class="card-title">讨论区</h5>
+                    <p class="card-text">开放的交流环境，分享学习经验，提问解惑，促进师生和同学间深入交流。</p>
+                    <a href="{% url 'forum:post_list' %}" class="btn btn-primary mt-3">进入论坛</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 平台特点 -->
+    <div class="row mt-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="animate-on-scroll invisible">为什么选择我们的平台</h2>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 animate-on-scroll invisible">
+                <div class="card-body d-flex">
+                    <div class="me-3 text-primary">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title">活跃的社区</h5>
+                        <p class="card-text">连接师生，建立紧密的学习社区，促进知识共享和合作学习。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 animate-on-scroll invisible">
+                <div class="card-body d-flex">
+                    <div class="me-3 text-primary">
+                        <i class="fas fa-mobile-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title">随时随地学习</h5>
+                        <p class="card-text">响应式设计，支持在各种设备上访问，让学习不受时间和空间限制。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 animate-on-scroll invisible">
+                <div class="card-body d-flex">
+                    <div class="me-3 text-primary">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title">安全可靠</h5>
+                        <p class="card-text">注重数据安全和隐私保护，为师生提供安全可靠的交流环境。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 animate-on-scroll invisible">
+                <div class="card-body d-flex">
+                    <div class="me-3 text-primary">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title">学习进度跟踪</h5>
+                        <p class="card-text">详细的数据分析，帮助师生了解学习进度和效果，支持教学决策。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

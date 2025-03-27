@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load assignment_filters %}
+
+{% block title %}{{ assignment.title }} - 作业与考试{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 左侧主要内容 -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="card-title">{{ assignment.title }}</h2>
+                            <p class="text-muted mb-0">
+                                <span class="me-3">
+                                    <i class="fas fa-user"></i> {{ assignment.teacher.username }}
+                                </span>
+                                <span class="me-3">
+                                    <i class="fas fa-clock"></i> {{ assignment.created_at|date:"Y-m-d H:i" }}
+                                </span>
+                                <span class="badge {% if assignment.type == 'homework' %}bg-primary{% else %}bg-danger{% endif %}">
+                                    {{ assignment.get_type_display }}
+                                </span>
+                            </p>
+                        </div>
+                        {% if user.role == 'teacher' or user.is_superuser %}
+                            <div>
+                                <a href="{% url 'assignments:assignment_update' assignment.pk %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </a>
+                                <a href="{% url 'assignments:question_create' assignment.pk %}" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-plus"></i> 添加题目
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ assignment.description|linebreaks }}
+                    </div>
+                    
+                    <div class="alert {% if assignment.is_active %}alert-success{% elif assignment.is_upcoming %}alert-secondary{% else %}alert-danger{% endif %}">
+                        <strong>当前状态：{% if assignment.is_active %}进行中{% elif assignment.is_upcoming %}未开始{% else %}已截止{% endif %}</strong><br>
+                        开始时间：{{ assignment.start_time|date:"Y-m-d H:i" }}<br>
+                        截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated and user.is_student %}
+                {% if submission %}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">你的提交状态</h5>
+                            <p class="mb-0">
+                                提交时间：{{ submission.submitted_at|date:"Y-m-d H:i" }}
+                                {% if submission.submitted_at > assignment.end_time %}
+                                    <span class="badge bg-warning">迟交</span>
+                                {% endif %}
+                            </p>
+                            {% if submission.is_graded %}
+                                <p class="mb-0 mt-2">
+                                    <span class="text-{% if submission.score >= assignment.total_score|multiply:0.6 %}success{% else %}danger{% endif %}">
+                                        得分：{{ submission.score }}/{{ assignment.total_score }}
+                                    </span>
+                                </p>
+                                {% if submission.feedback %}
+                                    <div class="mt-2">
+                                        <strong>教师评语：</strong>
+                                        <p>{{ submission.feedback|linebreaks }}</p>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <p class="mb-0 mt-2">
+                                    <span class="text-warning">待评分</span>
+                                </p>
+                            {% endif %}
+                            
+                            {% if assignment.is_active %}
+                                <div class="mt-3">
+                                    <a href="{% url 'assignments:submit_assignment' assignment.pk %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-edit"></i> 重新提交
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% elif assignment.is_active %}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">开始{{ assignment.get_type_display }}</h5>
+                            {% if assignment.type == 'exam' %}
+                                <p class="text-danger">注意：开始考试后不能中途退出，请确保有充足的时间完成考试。</p>
+                                <a href="{% url 'assignments:take_exam' assignment.pk %}" class="btn btn-danger">
+                                    <i class="fas fa-edit"></i> 开始考试
+                                </a>
+                            {% else %}
+                                {% if assignment.questions.exists %}
+                                    <a href="{% url 'assignments:submit_assignment' assignment.pk %}" class="btn btn-primary">
+                                        <i class="fas fa-upload"></i> 提交作业
+                                    </a>
+                                {% else %}
+                                    <button type="button" class="btn btn-secondary" disabled>此作业无题目，无法提交</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <!-- 题目列表部分 -->
+            {% if user.role == 'teacher' or user.is_superuser or submission.is_graded %}
+                <!-- 题目列表 -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">题目列表</h5>
+                        </div>
+                        
+                        {% for question in assignment.questions.all %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="card-title">
+                                            第{{ forloop.counter }}题
+                                            <span class="badge bg-secondary">{{ question.get_type_display }}</span>
+                                            <span class="badge bg-info">{{ question.score }}分</span>
+                                        </h6>
+                                        {% if user.role == 'teacher' or user.is_superuser %}
+                                            <div>
+                                                <a href="{% url 'assignments:question_update' question.pk %}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'assignments:question_delete' question.pk %}" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <p class="card-text mt-2">{{ question.content|linebreaks }}</p>
+                                    
+                                    {% if question.type != 'text' %}
+                                        <div class="list-group">
+                                            {% for choice in question.choices.all %}
+                                                <div class="list-group-item {% if submission.is_graded and choice.is_correct %}list-group-item-success{% endif %}">
+                                                    {{ choice.content }}
+                                                    {% if submission.is_graded and choice.is_correct %}
+                                                        <span class="badge bg-success float-end">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if submission and answers %}
+                                        {% with answer=answers|get_item:question.id %}
+                                            {% if answer %}
+                                                <div class="mt-3">
+                                                    <h6>你的答案：</h6>
+                                                    {% if question.type == 'text' %}
+                                                        <p>{{ answer.text_answer|linebreaks }}</p>
+                                                    {% else %}
+                                                        <div class="list-group">
+                                                            {% for choice in answer.selected_choices.all %}
+                                                                <div class="list-group-item {% if submission.is_graded %}{% if choice.is_correct %}list-group-item-success{% else %}list-group-item-danger{% endif %}{% endif %}">
+                                                                    {{ choice.content }}
+                                                                    {% if submission.is_graded %}
+                                                                        {% if choice.is_correct %}
+                                                                            <span class="badge bg-success float-end">
+                                                                                <i class="fas fa-check"></i>
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-danger float-end">
+                                                                                <i class="fas fa-times"></i>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% empty %}
+                                                                <div class="alert alert-warning">未选择任何选项</div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if answer.score is not None %}
+                                                        <div class="mt-2">
+                                                            <span class="text-{% if answer.score >= question.score|multiply:0.6 %}success{% else %}danger{% endif %}">
+                                                                得分：{{ answer.score|default_if_none:0 }}/{{ question.score }}分
+                                                            </span>
+                                                            {% if answer.comment %}
+                                                                <p class="text-muted mt-1">
+                                                                    评语：{{ answer.comment }}
+                                                                </p>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="alert alert-info">
+                                暂无题目
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elif user.is_student and submission %}
+                <!-- 未评分时学生也可以看到自己的答案 -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">你的答案</h5>
+                        
+                        {% for question in assignment.questions.all %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        第{{ forloop.counter }}题
+                                        <span class="badge bg-secondary">{{ question.get_type_display }}</span>
+                                        <span class="badge bg-info">{{ question.score }}分</span>
+                                    </h6>
+                                    
+                                    <p class="card-text">{{ question.content|linebreaks }}</p>
+                                    
+                                    {% with answer=answers|get_item:question.id %}
+                                        {% if answer %}
+                                            <div class="mt-3">
+                                                <h6>你的答案：</h6>
+                                                {% if question.type == 'text' %}
+                                                    <p>{{ answer.text_answer|linebreaks|default:"(未作答)" }}</p>
+                                                {% else %}
+                                                    <div class="list-group">
+                                                        {% for choice in answer.selected_choices.all %}
+                                                            <div class="list-group-item">
+                                                                {{ choice.content }}
+                                                            </div>
+                                                        {% empty %}
+                                                            <div class="alert alert-warning">未选择任何选项</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-warning">
+                                                未提交答案
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 右侧信息栏 -->
+        <div class="col-md-4">
+            {% if user.role == 'teacher' or user.is_superuser %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">提交统计</h5>
+                        <p class="mb-2">
+                            总人数：{{ submissions|length }}
+                        </p>
+                        <p class="mb-2">
+                            已评分：{{ graded_submissions|length }}
+                        </p>
+                        <p class="mb-0">
+                            未评分：{{ ungraded_submissions|length }}
+                        </p>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            {% if graded_submissions|length > 0 %}
+                                <a href="{% url 'assignments:assignment_statistics' assignment.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-chart-bar"></i> 查看评分统计
+                                </a>
+                            {% endif %}
+                            
+                            {% if submissions|length > 0 %}
+                                <a href="{% url 'assignments:submission_list' assignment.pk %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-list-ul"></i> 查看全部提交
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                        {% if submissions|length > 0 %}
+                            <hr>
+                            <h6>待评分列表 ({{ ungraded_submissions|length }})</h6>
+                            <div class="list-group">
+                                {% for submission in ungraded_submissions %}
+                                    <a href="{% url 'assignments:grade_submission' submission.pk %}" class="list-group-item list-group-item-action">
+                                        {{ submission.student.username }}
+                                        <small class="text-muted d-block">
+                                            {{ submission.submitted_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                        <small class="text-danger">
+                                            需评分
+                                        </small>
+                                    </a>
+                                {% empty %}
+                                    <p class="text-muted mb-0">暂无待评分提交</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">基本信息</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-graduation-cap"></i> 总分：{{ assignment.total_score }}分
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-list"></i> 题目数：{{ assignment.questions.count }}
+                        </li>
+                        <li>
+                            <i class="fas fa-users"></i> 提交人数：{{ submissions|length|default:0 }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

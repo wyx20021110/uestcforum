@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}启动服务器 | 高校师生互动交流平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .start-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .start-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .start-card .card-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+    
+    .start-card .card-body {
+        padding: 2rem;
+    }
+    
+    .code-block {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .code-block:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, #3498db, #2ecc71);
+    }
+    
+    .alert-custom {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-left: 4px solid #3498db;
+        padding: 1.25rem;
+        border-radius: 8px;
+    }
+    
+    .feature-list li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .feature-list li i {
+        color: #3498db;
+        margin-right: 0.75rem;
+        margin-top: 0.25rem;
+    }
+    
+    .feature-list {
+        padding-left: 0;
+        list-style-type: none;
+    }
+    
+    .btn-websocket {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
+        border-radius: 30px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-websocket:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    }
+    
+    .btn-websocket i {
+        margin-right: 0.5rem;
+    }
+    
+    .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        border-radius: 4px;
+        color: #ecf0f1;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .copy-btn:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .section-title {
+        position: relative;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .section-title:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+    }
+    
+    @media (max-width: 768px) {
+        .start-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .code-block {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container start-container">
+    <div class="start-card card animate__animated animate__fadeIn">
+        <div class="card-header">
+            <h3 class="text-white mb-0">
+                <i class="fas fa-server me-2"></i>启动WebSocket服务器
+            </h3>
+            <p class="text-white-50 mb-0 mt-2">实时通信功能需要专用的WebSocket服务器支持</p>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-custom animate__animated animate__fadeIn">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="alert-heading">重要提示</h5>
+                        <p class="mb-0">Django的开发服务器不完全支持WebSocket。为了使聊天和实时通知功能正常工作，请使用以下命令启动支持WebSocket的服务器。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="section-title mt-4 animate__animated animate__fadeInUp animate__delay-1s">启动命令</h4>
+            <div class="code-block animate__animated animate__fadeInUp animate__delay-1s">
+                <button class="copy-btn" onclick="copyToClipboard('daphne -b 0.0.0.0 -p 8000 myproject.asgi:application')">
+                    <i class="far fa-copy"></i> 复制
+                </button>
+                <code>daphne -b 0.0.0.0 -p 8000 myproject.asgi:application</code>
+            </div>
+            <p class="mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                这个命令将同时处理HTTP请求和WebSocket连接，无需额外的Django开发服务器。
+            </p>
+            
+            <h4 class="section-title mt-4 animate__animated animate__fadeInUp animate__delay-2s">参数说明</h4>
+            <ul class="feature-list animate__animated animate__fadeInUp animate__delay-2s">
+                <li>
+                    <i class="fas fa-network-wired"></i>
+                    <div>
+                        <strong>-b 0.0.0.0</strong>: 绑定到所有网络接口，允许从局域网访问
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-plug"></i>
+                    <div>
+                        <strong>-p 8000</strong>: 使用8000端口（可以根据需要更改）
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-code"></i>
+                    <div>
+                        <strong>myproject.asgi:application</strong>: ASGI应用入口点
+                    </div>
+                </li>
+            </ul>
+            
+            <h4 class="section-title mt-4 animate__animated animate__fadeInUp animate__delay-3s">注意事项</h4>
+            <ul class="feature-list animate__animated animate__fadeInUp animate__delay-3s">
+                <li>
+                    <i class="fas fa-download"></i>
+                    <div>
+                        <strong>安装Daphne</strong>: 请确保已安装Daphne — <code>pip install daphne</code>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-globe"></i>
+                    <div>
+                        <strong>连接设置</strong>: WebSocket连接将使用与HTTP相同的主机和端口
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>生产环境</strong>: 在生产环境中，建议使用Supervisor或Systemd等工具管理Daphne进程
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="text-center mt-5 animate__animated animate__fadeInUp animate__delay-4s">
+                <a href="{% url 'chat:index' %}" class="btn btn-websocket">
+                    <i class="fas fa-comments"></i> 前往聊天室
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // 显示复制成功提示
+        const copyBtn = event.target.closest('.copy-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    }
+</script>
+{% endblock %} 
