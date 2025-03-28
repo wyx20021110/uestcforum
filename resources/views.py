@@ -10,11 +10,12 @@ from django.views.decorators.http import require_POST
 from .models import Resource, ResourceCategory, ResourceComment
 from .forms import ResourceForm, ResourceCommentForm
 import logging
+from django.contrib.auth.models import User
 
 logger = logging.getLogger(__name__)
 
 def is_teacher(user):
-    return user.is_authenticated and user.is_teacher()
+    return user.is_authenticated and (user.is_teacher() or user.is_admin())
 
 class ResourceListView(ListView):
     model = Resource
@@ -24,14 +25,38 @@ class ResourceListView(ListView):
     
     def get_queryset(self):
         queryset = Resource.objects.all().order_by('-created_at')
+        
+        # 通过URL参数过滤
         category_id = self.request.GET.get('category')
         if category_id:
             queryset = queryset.filter(category_id=category_id)
+            
+        # 通过URL路径过滤分类
+        category_slug = self.kwargs.get('slug')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+            
+        # 通过URL路径过滤上传者
+        uploader_username = self.kwargs.get('username')
+        if uploader_username:
+            queryset = queryset.filter(uploaded_by__username=uploader_username)
+            
         return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = ResourceCategory.objects.all()
+        
+        # 添加当前分类到上下文
+        category_slug = self.kwargs.get('slug')
+        if category_slug:
+            context['category'] = get_object_or_404(ResourceCategory, slug=category_slug)
+            
+        # 添加当前上传者到上下文
+        uploader_username = self.kwargs.get('username')
+        if uploader_username:
+            context['uploader'] = get_object_or_404(User, username=uploader_username)
+            
         return context
 
 class ResourceDetailView(DetailView):

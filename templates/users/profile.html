@@ -176,14 +176,14 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        {% if user.avatar %}
-                            <img src="{{ user.avatar.url }}" alt="用户头像" class="rounded-circle user-avatar">
+                        {% if profile_user.avatar %}
+                            <img src="{{ profile_user.avatar.url }}" alt="用户头像" class="rounded-circle user-avatar">
                         {% else %}
-                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="默认头像" class="rounded-circle user-avatar">
+                            <img src="https://ui-avatars.com/api/?name={{ profile_user.username }}&size=150&background=random" alt="默认头像" class="rounded-circle user-avatar">
                         {% endif %}
                     </div>
-                    <h4 class="card-title">{{ user.username }}</h4>
-                    <p class="badge bg-primary rounded-pill">{{ user.get_role_display }}</p>
+                    <h4 class="card-title">{{ profile_user.username }}</h4>
+                    <p class="badge bg-primary rounded-pill">{{ profile_user.get_role_display }}</p>
                     <div class="d-grid gap-2 mt-3">
                         {% if is_own_profile %}
                         <a href="{% url 'users:change_password' %}" class="btn btn-outline-primary">
@@ -205,36 +205,36 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <div class="text-muted small">电子邮箱</div>
-                        <div>{{ user.email|default:"未设置" }}</div>
+                        <div>{{ profile_user.email|default:"未设置" }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="text-muted small">学号/工号</div>
-                        <div>{{ user.student_id|default:"未设置" }}</div>
+                        <div>{{ profile_user.student_id|default:"未设置" }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="text-muted small">院系</div>
-                        <div>{{ user.department|default:"未设置" }}</div>
+                        <div>{{ profile_user.department|default:"未设置" }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="text-muted small">专业</div>
-                        <div>{{ user.major|default:"未设置" }}</div>
+                        <div>{{ profile_user.major|default:"未设置" }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="text-muted small">年级</div>
-                        <div>{{ user.grade|default:"未设置" }}</div>
+                        <div>{{ profile_user.grade|default:"未设置" }}</div>
                     </div>
                     <div>
                         <div class="text-muted small">注册时间</div>
-                        <div>{{ user.date_joined|date:"Y-m-d H:i" }}</div>
+                        <div>{{ profile_user.date_joined|date:"Y-m-d H:i" }}</div>
                     </div>
                 </div>
             </div>
             
             <!-- 个人简介 -->
-            {% if user.bio %}
+            {% if profile_user.bio %}
             <div class="user-bio mt-4">
                 <h5 class="mb-3"><i class="fas fa-quote-left me-2"></i>个人简介</h5>
-                <p class="mb-0">{{ user.bio }}</p>
+                <p class="mb-0">{{ profile_user.bio }}</p>
             </div>
             {% endif %}
         </div>
@@ -242,7 +242,7 @@
         <!-- 右侧帖子列表 -->
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>{% if is_own_profile %}我的帖子{% else %}{{ user.username }} 的帖子{% endif %}</h4>
+                <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>{% if is_own_profile %}我的帖子{% else %}{{ profile_user.username }} 的帖子{% endif %}</h4>
                 {% if is_own_profile %}
                 <a href="{% url 'forum:post_create' %}" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i> 发布新帖子

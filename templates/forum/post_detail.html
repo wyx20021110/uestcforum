@@ -88,14 +88,15 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div class="d-flex">
+                        {% if post.author %}
                         <a href="{% url 'users:user_profile' post.author.id %}" class="me-3" style="text-decoration: none;">
                             {% if post.author.avatar %}
                                 <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
                                     <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
                                 </div>
                             {% else %}
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                    <i class="fas fa-user-circle fa-lg"></i>
+                                <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                                    <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=150&background=random" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
                                 </div>
                             {% endif %}
                         </a>
@@ -107,6 +108,17 @@
                             </h5>
                             <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
                         </div>
+                        {% else %}
+                        <div class="me-3">
+                            <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                                <img src="https://ui-avatars.com/api/?name=已删除&size=150&background=random" alt="已删除用户" class="w-100 h-100 rounded-circle">
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-muted">已删除用户</h5>
+                            <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                        {% endif %}
                     </div>
                     <div>
                         {% if user == post.author or user.is_staff %}
@@ -202,14 +214,15 @@
                     {% for comment in post.comments.all %}
                         <div class="p-3 comment-card">
                             <div class="d-flex mb-2">
+                                {% if comment.author %}
                                 <a href="{% url 'users:user_profile' comment.author.id %}" class="me-2" style="text-decoration: none;">
                                     {% if comment.author.avatar %}
                                         <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;">
                                             <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100">
                                         </div>
                                     {% else %}
-                                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                            <i class="fas fa-user-circle"></i>
+                                        <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;">
+                                            <img src="https://ui-avatars.com/api/?name={{ comment.author.username }}&size=150&background=random" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
                                         </div>
                                     {% endif %}
                                 </a>
@@ -221,6 +234,17 @@
                                     </h6>
                                     <small class="post-time">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
                                 </div>
+                                {% else %}
+                                <div class="me-2">
+                                    <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;">
+                                        <img src="https://ui-avatars.com/api/?name=游客&size=150&background=random" alt="游客" class="w-100 h-100 rounded-circle">
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-muted">游客</h6>
+                                    <small class="post-time">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                </div>
+                                {% endif %}
                                 {% if user == comment.author or user.is_staff %}
                                     <div class="ms-auto">
                                         <a href="{% url 'forum:comment_edit' comment.id %}" class="btn btn-sm interaction-btn">

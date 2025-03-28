@@ -254,9 +254,7 @@
                         <i class="fas fa-edit"></i> 发布新动态
                     </a>
                 {% else %}
-                    <a href="{% url 'users:login' %}" class="btn btn-light">
-                        <i class="fas fa-sign-in-alt me-2"></i>登录发布
-                    </a>
+                    <!-- 登录按钮已移除 -->
                 {% endif %}
             </div>
         </div>
@@ -292,14 +290,15 @@
         <div class="card post-card animate__animated animate__fadeInUp animate__delay-{{ forloop.counter|divisibleby:3 }}s">
             <div class="card-body">
                 <div class="d-flex mb-3">
+                    {% if post.author %}
                     <a href="{% url 'users:user_profile' post.author.id %}" class="me-3" style="text-decoration: none;">
                         {% if post.author.avatar %}
                             <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
                                 <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
                             </div>
                         {% else %}
-                            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                <i class="fas fa-user-circle fa-lg"></i>
+                            <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                                <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=150&background=random" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
                             </div>
                         {% endif %}
                     </a>
@@ -311,6 +310,17 @@
                         </h5>
                         <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
                     </div>
+                    {% else %}
+                    <div class="me-3">
+                        <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                            <img src="https://ui-avatars.com/api/?name=已删除&size=150&background=random" alt="已删除用户" class="w-100 h-100 rounded-circle">
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="post-author mb-0 text-muted">已删除用户</h5>
+                        <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    {% endif %}
                 </div>
                 
                 {% if post.title %}
@@ -385,8 +395,8 @@
                                     {% if user.avatar %}
                                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
                                     {% else %}
-                                        <div style="width: 100%; height: 100%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                            <i class="fas fa-user-circle"></i>
+                                        <div style="width: 100%; height: 100%; overflow: hidden;">
+                                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
                                         </div>
                                     {% endif %}
                                 </div>
@@ -407,20 +417,28 @@
                         {% for comment in post.comments.all|slice:":3" %}
                             <div class="comment-item">
                                 <div class="d-flex">
+                                    {% if comment.author %}
                                     <a href="{% url 'users:user_profile' comment.author.id %}" class="me-2" style="text-decoration: none;">
                                         {% if comment.author.avatar %}
                                             <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
                                                 <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100">
                                             </div>
                                         {% else %}
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                                <i class="fas fa-user-circle"></i>
+                                            <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                                <img src="https://ui-avatars.com/api/?name={{ comment.author.username }}&size=150&background=random" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
                                             </div>
                                         {% endif %}
                                     </a>
+                                    {% else %}
+                                    <div class="me-2">
+                                        <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                            <img src="https://ui-avatars.com/api/?name=游客&size=150&background=random" alt="游客" class="w-100 h-100 rounded-circle">
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center">
-                                            <strong class="me-2">{{ comment.author.username }}</strong>
+                                            <strong class="me-2">{{ comment.author.username|default:"游客" }}</strong>
                                             <small class="post-time">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
                                         </div>
                                         <div>{{ comment.content }}</div>
@@ -453,15 +471,9 @@
                 <p>没有找到与"{{ request.GET.search }}"相关的动态。</p>
                 <a href="{% url 'forum:post_list' %}" class="btn btn-outline-primary mt-2">查看全部动态</a>
             {% else %}
-                <p>成为第一个发布动态的人吧！</p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'forum:post_create' %}" class="btn btn-primary mt-2">
-                        <i class="fas fa-edit me-2"></i>发布动态
-                    </a>
-                {% else %}
-                    <a href="{% url 'users:login' %}" class="btn btn-primary mt-2">
-                        <i class="fas fa-sign-in-alt me-2"></i>登录后发布
-                    </a>
+                <p>论坛目前还没有任何动态内容，可以通过页面顶部的按钮发布新动态。</p>
+                {% if not user.is_authenticated %}
+                    <!-- 登录后发布按钮已移除 -->
                 {% endif %}
             {% endif %}
         </div>
@@ -527,6 +539,14 @@
             
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
+                
+                // 检查用户是否登录
+                if ('{{ user.is_authenticated }}' !== 'True') {
+                    alert('请先登录后再点赞');
+                    window.location.href = '{% url "users:login" %}';
+                    return;
+                }
+                
                 const postId = this.dataset.postId;
                 console.log('点击点赞按钮, postId:', postId);
                 
@@ -673,23 +693,33 @@
                 
                 // 修改生成的头像结构，使其与模板中的一致
                 let avatarHtml = '';
-                if ('{{ user.avatar }}') {
+                {% if user.is_authenticated %}
+                    if ('{{ user.avatar }}') {
+                        avatarHtml = `
+                            <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
+                                <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
+                                </div>
+                            </a>
+                        `;
+                    } else {
+                        avatarHtml = `
+                            <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
+                                <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
+                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
+                                </div>
+                            </a>
+                        `;
+                    }
+                {% else %}
                     avatarHtml = `
-                        <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
+                        <div class="me-2">
                             <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
-                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
+                                <img src="https://ui-avatars.com/api/?name=游客&size=150&background=random" alt="游客" class="w-100 h-100 rounded-circle">
                             </div>
-                        </a>
+                        </div>
                     `;
-                } else {
-                    avatarHtml = `
-                        <a href="{% url 'users:user_profile' user.id %}" class="me-2" style="text-decoration: none;">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                        </a>
-                    `;
-                }
+                {% endif %}
                 
                 // 创建评论HTML结构
                 commentItem.innerHTML = `
@@ -697,7 +727,7 @@
                         ${avatarHtml}
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center">
-                                <strong class="me-2">{{ user.username }}</strong>
+                                <strong class="me-2">{% if user.is_authenticated %}{{ user.username }}{% else %}游客{% endif %}</strong>
                                 <small class="post-time">刚刚</small>
                             </div>
                             <div>${content}</div>
@@ -758,6 +788,13 @@
     });
 
     function toggleCommentForm(postId) {
+        // 检查用户是否登录
+        if ('{{ user.is_authenticated }}' !== 'True') {
+            alert('请先登录后再评论');
+            window.location.href = '{% url "users:login" %}';
+            return;
+        }
+        
         const commentSection = document.getElementById(`comment-section-${postId}`);
         if (commentSection.style.display === 'none') {
             // 先隐藏所有已打开的评论区

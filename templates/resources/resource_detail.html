@@ -392,10 +392,10 @@
                         <i class="fas fa-comment-dots me-2"></i> 发表评论
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{% url 'resources:add_comment' resource.id %}" class="comment-form">
+                        <form method="post" action="{% url 'resources:comment_create' resource.id %}" class="comment-form">
                             {% csrf_token %}
                             <div class="mb-3">
-                                {{ comment_form.text }}
+                                {{ comment_form.content }}
                             </div>
                             <button type="submit" class="btn btn-primary action-btn">
                                 <i class="fas fa-paper-plane"></i> 提交评论
@@ -428,10 +428,10 @@
                                 
                                 {% if user == comment.author or user.is_staff %}
                                 <div class="mt-2 text-end">
-                                    <a href="{% url 'resources:edit_comment' comment.id %}" class="btn btn-sm btn-outline-primary me-2">
+                                    <a href="{% url 'resources:comment_edit' comment.id %}" class="btn btn-sm btn-outline-primary me-2">
                                         <i class="fas fa-edit"></i> 编辑
                                     </a>
-                                    <a href="{% url 'resources:delete_comment' comment.id %}" class="btn btn-sm btn-outline-danger">
+                                    <a href="{% url 'resources:comment_delete' comment.id %}" class="btn btn-sm btn-outline-danger">
                                         <i class="fas fa-trash"></i> 删除
                                     </a>
                                 </div>

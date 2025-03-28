@@ -5,7 +5,6 @@ app_name = 'chat'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('room/<int:room_id>/', views.room, name='room'),
     path('create-private-chat/', views.create_private_chat, name='create_private_chat'),
     path('create-group-chat/', views.create_group_chat, name='create_group_chat'),
     path('get-unread-count/', views.get_unread_count, name='get_unread_count'),

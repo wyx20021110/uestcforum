@@ -26,6 +26,8 @@
         overflow-y: auto;
         overflow-x: hidden;
         padding: 1rem;
+        position: relative;
+        -webkit-overflow-scrolling: touch; /* 改善iOS滚动体验 */
     }
     
     /* 消息项 */
@@ -40,6 +42,38 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(10px); }
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); }
+        to { transform: translateX(100%); }
+    }
+    
+    @keyframes slideInLeft {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(0); }
+    }
+    
+    @keyframes slideOutLeft {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+    
     .message-item.sent {
         margin-left: auto;
         align-items: flex-end;
@@ -150,7 +184,7 @@
     .chat-avatar {
         width: 48px;
         height: 48px;
-        border-radius: 8px;
+        border-radius: 50%;
         margin-right: 12px;
         position: relative;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -161,7 +195,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 8px;
+        border-radius: 50%;
         transition: transform 0.3s;
     }
     .chat-list-item:hover .chat-avatar img {
@@ -304,21 +338,28 @@
     }
     
     @media (max-width: 768px) {
-        /* 移动端布局调整 - 为标题栏留出空间 */
-        .container-fluid {
-            padding-top: 50px; /* 为移动端标题栏留出空间 */
+        #chat-main-container {
+            padding-top: 60px;
         }
         
         .chat-sidebar {
             height: calc(100vh - 120px);
             border: none;
-            margin-top: 10px; /* 为内容添加一点顶部间距 */
+            margin-top: 10px;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            position: relative;
+            top: 0;
+            left: 0;
+            right: 0;
+            overflow-x: hidden;
         }
         
-        /* 移动端的聊天室区域显示控制 */
         .mobile-chat-view .chat-main-card {
             position: fixed;
-            top: 50px; /* 从标题栏下方开始 */
+            top: 50px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -326,12 +367,11 @@
             background-color: white;
             padding-top: 0;
             margin: 0;
-            height: calc(100vh - 50px) !important; /* 减去标题栏高度 */
+            height: calc(100vh - 50px) !important;
             border-radius: 0;
             box-shadow: none;
         }
         
-        /* 移动端默认隐藏聊天区域 */
         .chat-area-container {
             display: none;
         }
@@ -346,17 +386,7 @@
         
         .contact-list-container {
             display: block;
-        }
-        
-        /* 确保聊天输入区域在底部固定 */
-        .chat-container {
-            height: calc(100vh - 60px);
-            padding-bottom: 70px; /* 为输入框腾出空间 */
-        }
-        
-        /* 为移动端头部留出空间 - 修复之前的样式 */
-        .mobile-chat-view .chat-container {
-            padding-top: 0; /* 不需要额外的内边距，因为容器已经从标题栏下方开始 */
+            width: 100%;
         }
         
         .chat-input {
@@ -372,13 +402,10 @@
             height: 70px;
         }
         
-        /* 修复消息列表高度，确保内容不被输入框遮挡 */
         .message-list {
-            margin-bottom: 80px; /* 大于聊天输入框高度 */
+            margin-bottom: 80px;
             padding-bottom: 20px;
         }
-        
-        /* 微信风格标题栏 */
         .mobile-header {
             position: fixed;
             top: 0;
@@ -392,20 +419,16 @@
             justify-content: center;
             box-shadow: 0 1px 5px rgba(0,0,0,0.1);
         }
-        
         .mobile-title {
             font-size: 1.1rem;
             font-weight: 500;
         }
-        
         .mobile-back-btn {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
         }
-        
-        /* 模态框在移动端的样式增强 */
         .modal-dialog {
             margin: 1rem auto;
             max-width: 95%;
@@ -430,18 +453,129 @@
             width: 40px;
             height: 40px;
         }
+        
+        /* 小屏幕上的容器处理 */
+        #chat-main-container.container {
+            padding-left: 0;
+            padding-right: 0;
+            max-width: 100%;
+            width: 100%;
+        }
+        
+        .chat-sidebar {
+            border-radius: 0;
+            margin: 0 auto;
+            width: 100%;
+            border: none;
+            box-shadow: none;
+        }
+        
+        #unified-chat-list {
+            margin: 0 auto;
+            width: 100%;
+            padding: 0;
+        }
+        
+        .chat-list-item {
+            width: 100%;
+            padding: 10px 15px;
+            box-sizing: border-box;
+        }
+        
+        .row.justify-content-center {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .contact-list-container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        .chat-main-card {
+            margin: 0 auto;
+            width: 100%;
+        }
+        .chat-area-container {
+            display: none;
+        }
+        .mobile-chat-view .chat-area-container {
+            display: block;
+        }
+    }
+    
+    /* 网络连接状态指示器 */
+    .connection-status {
+        position: fixed;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .connection-status.show {
+        opacity: 1;
+    }
+    
+    .connection-status.connecting {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .connection-status.connected {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .connection-status.disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .connection-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .connection-status.connecting .connection-indicator {
+        background-color: #ffc107;
+        animation: pulse 1s infinite;
+    }
+    
+    .connection-status.connected .connection-indicator {
+        background-color: #28a745;
+    }
+    
+    .connection-status.disconnected .connection-indicator {
+        background-color: #dc3545;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 animate__animated animate__fadeIn" id="chat-main-container">
+<div class="container py-4 animate__animated animate__fadeIn" id="chat-main-container">
     <!-- 移动端标题栏 -->
     <div class="mobile-header d-md-none">
         <button class="btn btn-sm btn-link mobile-back-btn d-none" id="mobile-back-btn">
             <i class="fas fa-arrow-left"></i>
         </button>
         <div class="mobile-title">聊天</div>
+    </div>
+
+    <!-- 连接状态指示器 -->
+    <div class="connection-status" id="connection-status">
+        <div class="connection-indicator"></div>
+        <span class="connection-text">连接中...</span>
     </div>
 
     <div class="row d-md-flex d-none">
@@ -452,15 +586,12 @@
         </div>
     </div>
     
-    <div class="row" id="chat-container">
+    <div class="row justify-content-center" id="chat-container">
         <!-- 联系人列表容器 -->
         <div class="col-md-4 col-lg-3 mb-4 mb-md-0 contact-list-container">
             <div class="chat-sidebar card" id="chat-sidebar">
                 <div class="d-flex justify-content-between align-items-center p-3">
                     <h5 class="mb-0 d-none d-md-block">聊天</h5>
-                    <button class="btn btn-sm btn-primary create-group-btn" data-bs-toggle="modal" data-bs-target="#createGroupModal">
-                        <i class="fas fa-users"></i> <span class="d-none d-sm-inline">新建群组</span>
-                    </button>
                 </div>
                 
                 <div class="chat-search">
@@ -482,10 +613,10 @@
                                 {% if room.other_participant.profile_image %}
                                 <img src="{{ room.other_participant.profile_image.url }}" alt="{{ room.name }}">
                                 {% else %}
-                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ room.name }}">
+                                <img src="https://ui-avatars.com/api/?name={{ room.other_participant.username }}&size=150&background=random" alt="{{ room.name }}" class="rounded-circle">
                                 {% endif %}
                             {% else %}
-                                <img src="{% static 'images/group-avatar.png' %}" alt="{{ room.name }}">
+                                <img src="https://ui-avatars.com/api/?name={{ room.name }}&size=150&background=3498db&color=fff" alt="{{ room.name }}" class="rounded-circle">
                             {% endif %}
                             
                             {% if room.unread_count > 0 %}
@@ -519,7 +650,7 @@
                             {% if user.profile_image %}
                             <img src="{{ user.profile_image.url }}" alt="{{ user.username }}">
                             {% else %}
-                            <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.username }}">
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="{{ user.username }}" class="rounded-circle">
                             {% endif %}
                         </div>
                         <div class="chat-info">
@@ -598,45 +729,6 @@
         </div>
     </div>
 </div>
-
-<!-- 创建群组模态框 -->
-<div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createGroupModalLabel">创建群组</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="group-name" class="form-label">群组名称</label>
-                    <input type="text" class="form-control" id="group-name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="group-description" class="form-label">群组描述（可选）</label>
-                    <textarea class="form-control" id="group-description" rows="3"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">添加成员</label>
-                    <div class="user-selection" style="max-height: 200px; overflow-y: auto;">
-                        {% for user in available_users %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{ user.id }}" id="user-{{ user.id }}">
-                            <label class="form-check-label" for="user-{{ user.id }}">
-                                {{ user.username }} ({{ user.get_role_display }})
-                            </label>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="create-group-btn">创建群组</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -651,6 +743,13 @@
     let reconnectInterval = 3000;
     let emptyStateElement = null;
     let isMobileView = window.innerWidth < 768;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isRefreshing = false;
+    let pullStartY = 0;
+    let pullMoveY = 0;
+    let isPulling = false;
+    let refreshIndicator = null;
     
     // DOM元素
     const messageList = document.getElementById('message-list');
@@ -669,6 +768,180 @@
     const mobileBackBtn = document.getElementById('mobile-back-btn');
     const mobileTitle = document.querySelector('.mobile-title');
     const chatMainContainer = document.getElementById('chat-main-container');
+    const connectionStatus = document.getElementById('connection-status');
+    
+    // 初始化下拉刷新指示器
+    function initPullToRefresh() {
+        if (!isMobileView) return;
+        
+        // 如果已经存在刷新指示器，先移除它
+        if (refreshIndicator && refreshIndicator.parentNode) {
+            refreshIndicator.parentNode.removeChild(refreshIndicator);
+        }
+        
+        // 创建刷新指示器
+        refreshIndicator = document.createElement('div');
+        refreshIndicator.className = 'pull-to-refresh-indicator';
+        refreshIndicator.innerHTML = `
+            <div class="spinner-border text-primary spinner-border-sm" role="status">
+                <span class="visually-hidden">刷新中...</span>
+            </div>
+            <span class="ms-2 refresh-text">下拉刷新</span>
+        `;
+        refreshIndicator.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateY(-100%);
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            visibility: hidden; /* 初始状态下隐藏 */
+        `;
+        
+        // 添加到DOM
+        if (messageList && messageList.parentNode) {
+            messageList.parentNode.insertBefore(refreshIndicator, messageList);
+            
+            // 确保初始状态下是完全隐藏的
+            setTimeout(() => {
+                if (refreshIndicator) {
+                    refreshIndicator.style.transform = 'translateY(-100%)';
+                    refreshIndicator.style.visibility = 'visible';
+                }
+            }, 100);
+        }
+    }
+    
+    // 设置触摸事件监听器
+    function setupTouchEvents() {
+        if (!isMobileView) return;
+        
+        // 滑动返回手势
+        if (chatAreaContainer) {
+            chatAreaContainer.addEventListener('touchstart', handleTouchStart, false);
+            chatAreaContainer.addEventListener('touchmove', handleTouchMove, false);
+            chatAreaContainer.addEventListener('touchend', handleTouchEnd, false);
+        }
+        
+        // 下拉刷新手势
+        if (messageList) {
+            messageList.addEventListener('touchstart', handlePullStart, { passive: true });
+            messageList.addEventListener('touchmove', handlePullMove, { passive: true });
+            messageList.addEventListener('touchend', handlePullEnd, { passive: true });
+        }
+    }
+    
+    // 处理滑动返回触摸事件
+    function handleTouchStart(e) {
+        touchStartX = e.touches[0].clientX;
+    }
+    
+    function handleTouchMove(e) {
+        if (!activeRoomId) return;
+        
+        touchEndX = e.touches[0].clientX;
+        const diffX = touchEndX - touchStartX;
+        
+        // 如果从左边缘向右滑动超过50px，添加视觉反馈
+        if (touchStartX < 50 && diffX > 30) {
+            chatAreaContainer.style.transform = `translateX(${Math.min(diffX, 100)}px)`;
+            chatAreaContainer.style.transition = 'none';
+            e.preventDefault();
+        }
+    }
+    
+    function handleTouchEnd(e) {
+        if (!activeRoomId) return;
+        
+        const diffX = touchEndX - touchStartX;
+        
+        // 如果滑动距离足够大，返回联系人列表
+        if (touchStartX < 50 && diffX > 100) {
+            mobileBackBtn.click();
+        }
+        
+        // 重置样式
+        chatAreaContainer.style.transform = '';
+        chatAreaContainer.style.transition = 'transform 0.3s ease';
+    }
+    
+    // 处理下拉刷新触摸事件
+    function handlePullStart(e) {
+        if (isRefreshing || !messageList || messageList.scrollTop > 0) return;
+        
+        isPulling = true;
+        pullStartY = e.touches[0].clientY;
+        
+        // 确保刷新指示器可见但初始位置在屏幕外
+        if (refreshIndicator) {
+            refreshIndicator.style.visibility = 'visible';
+            refreshIndicator.style.transform = 'translateY(-100%)';
+        }
+    }
+    
+    function handlePullMove(e) {
+        if (!isPulling || isRefreshing || !refreshIndicator) return;
+        
+        pullMoveY = e.touches[0].clientY;
+        const pullDistance = pullMoveY - pullStartY;
+        
+        if (pullDistance > 0 && messageList.scrollTop <= 0) {
+            // 更新指示器位置
+            const translateY = Math.min(Math.max(pullDistance * 0.4, 0), 80);
+            refreshIndicator.style.transform = `translateY(${translateY - 100}%)`;
+            
+            // 更新提示文本
+            const refreshText = refreshIndicator.querySelector('.refresh-text');
+            if (refreshText) {
+                refreshText.textContent = pullDistance > 60 ? '释放刷新' : '下拉刷新';
+            }
+            
+            // 阻止下拉导致的页面滚动
+            e.preventDefault();
+        }
+    }
+    
+    function handlePullEnd(e) {
+        if (!isPulling || isRefreshing) return;
+
+        const pullDistance = pullMoveY - pullStartY;
+        
+        if (pullDistance > 60 && messageList.scrollTop <= 0) {
+            // 执行刷新操作
+            performRefresh();
+        } else {
+            // 复原指示器
+            refreshIndicator.style.transform = 'translateY(-100%)';
+        }
+        
+        isPulling = false;
+    }
+    
+    // 完成刷新
+    function finishRefresh() {
+        // 复原指示器
+        if (refreshIndicator) {
+            refreshIndicator.style.transform = 'translateY(-100%)';
+            // 确保完全隐藏
+            setTimeout(() => {
+                if (refreshIndicator) {
+                    refreshIndicator.style.visibility = 'hidden';
+                }
+            }, 300); // 等待过渡动画完成
+        }
+        
+        isRefreshing = false;
+        
+        // 显示刷新成功消息
+        showSystemMessage('刷新成功', 'success');
+    }
     
     // 检测设备类型并设置视图模式
     function updateViewMode() {
@@ -684,11 +957,29 @@
             } else {
                 showContactList();
             }
+            
+            // 初始化移动端特定功能
+            initPullToRefresh();
+            setupTouchEvents();
         } else {
             // 桌面端视图
             chatMainContainer.classList.remove('mobile-chat-view');
             contactListContainer.style.display = 'block';
             chatAreaContainer.style.display = 'block';
+            
+            // 确保聊天室内容可见（如果已选择聊天室）
+            if (activeRoomId) {
+                chatWelcome.style.display = 'none';
+                chatWelcome.style.visibility = 'hidden';
+                chatWelcome.style.opacity = '0';
+                chatWelcome.style.zIndex = '-1';
+                
+                chatRoomContainer.classList.remove('d-none');
+                chatRoomContainer.style.display = 'block';
+                chatRoomContainer.style.visibility = 'visible';
+                chatRoomContainer.style.opacity = '1';
+                chatRoomContainer.style.zIndex = '20';
+            }
         }
     }
     
@@ -696,8 +987,17 @@
     function showContactList() {
         if (!isMobileView) return;
         
+        // 使用动画效果
         contactListContainer.style.display = 'block';
-        chatAreaContainer.style.display = 'none';
+        contactListContainer.style.animation = 'fadeIn 0.3s forwards';
+        
+        if (chatAreaContainer) {
+            chatAreaContainer.style.animation = 'fadeOut 0.3s forwards';
+            setTimeout(() => {
+                chatAreaContainer.style.display = 'none';
+            }, 300);
+        }
+        
         chatMainContainer.classList.remove('mobile-chat-view');
         mobileBackBtn.classList.add('d-none');
         mobileTitle.textContent = '聊天';
@@ -707,8 +1007,15 @@
     function showChatArea() {
         if (!isMobileView) return;
         
-        contactListContainer.style.display = 'none';
+        // 使用动画效果
         chatAreaContainer.style.display = 'block';
+        chatAreaContainer.style.animation = 'fadeIn 0.3s forwards';
+        
+        contactListContainer.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => {
+            contactListContainer.style.display = 'none';
+        }, 300);
+        
         chatMainContainer.classList.add('mobile-chat-view');
         mobileBackBtn.classList.remove('d-none');
         
@@ -718,13 +1025,60 @@
         } else {
             mobileTitle.textContent = '聊天';
         }
+        
+        // 确保输入框获得焦点
+        setTimeout(() => {
+            messageInput.focus();
+        }, 400);
     }
     
     // 初始设置视图模式
     updateViewMode();
+
+    // 确保初始状态下聊天列表显示正确
+    fixChatListDisplay();
     
     // 窗口大小改变时更新视图模式
-    window.addEventListener('resize', updateViewMode);
+    window.addEventListener('resize', function() {
+        const wasMobileView = isMobileView;
+        isMobileView = window.innerWidth < 768;
+        
+        // 如果视图模式发生变化（从移动端变为桌面端或相反）
+        if (wasMobileView !== isMobileView) {
+            // 更新视图模式
+            updateViewMode();
+            
+            // 如果有活跃聊天室，确保它能正确显示
+            if (activeRoomId) {
+                // 移除并重新添加活跃状态
+                document.querySelectorAll('.room-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const selectedRoom = document.querySelector(`.room-item[data-room-id="${activeRoomId}"]`);
+                if (selectedRoom) {
+                    selectedRoom.classList.add('active');
+                }
+                
+                // 确保聊天室内容可见
+                chatWelcome.style.display = 'none';
+                chatWelcome.style.visibility = 'hidden';
+                chatWelcome.style.opacity = '0';
+                chatWelcome.style.zIndex = '-1';
+                
+                chatRoomContainer.classList.remove('d-none');
+                chatRoomContainer.style.display = 'block';
+                chatRoomContainer.style.visibility = 'visible';
+                chatRoomContainer.style.opacity = '1';
+                chatRoomContainer.style.zIndex = '20';
+                
+                // 在桌面模式下，确保两个容器都可见
+                if (!isMobileView) {
+                    contactListContainer.style.display = 'block';
+                    chatAreaContainer.style.display = 'block';
+                }
+            }
+        }
+    });
     
     // 返回联系人列表
     mobileBackBtn.addEventListener('click', function() {
@@ -825,7 +1179,16 @@
         // 清空聊天记录
         messageList.innerHTML = '';
         
-        // 显示加载指示器
+        // 显示加载指示器并添加加载动画
+        loadingIndicator.innerHTML = `
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">加载消息中...</p>
+            <div class="progress mt-2" style="height: 4px; width: 100px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+            </div>
+        `;
         loadingIndicator.style.display = 'block';
         
         // 移动端视图切换
@@ -833,9 +1196,17 @@
             showChatArea();
         }
         
+        // 添加骨架屏动画，提升用户感知
+        addMessageSkeletons();
+        
         // 获取聊天室信息
         fetch(`/chat/api/room/${roomId}/`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`服务器响应错误: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 roomName.textContent = data.room.name;
                 
@@ -855,17 +1226,54 @@
                 if (isMobileView) {
                     mobileTitle.textContent = data.room.name;
                 }
+                
+                // 移除骨架屏
+                setTimeout(() => {
+                    removeMessageSkeletons();
+                }, 300);
             })
             .catch(error => {
                 console.error('获取聊天室信息失败:', error);
                 messageList.innerHTML = `
                     <div class="alert alert-danger m-3">
                         <h5><i class="fas fa-exclamation-triangle"></i> 加载失败</h5>
-                        <p>无法加载聊天室信息，请重试。</p>
+                        <p>无法加载聊天室信息: ${error.message}</p>
+                        <button class="btn btn-primary mt-2" onclick="loadChatRoom(${roomId})">
+                            <i class="fas fa-sync-alt"></i> 重试
+                        </button>
                     </div>
                 `;
                 loadingIndicator.style.display = 'none';
+                
+                // 移除骨架屏
+                removeMessageSkeletons();
             });
+    }
+    
+    // 添加消息骨架屏
+    function addMessageSkeletons() {
+        // 添加3个骨架消息
+        for (let i = 0; i < 3; i++) {
+            const isRight = i % 2 === 0;
+            const skeleton = document.createElement('div');
+            skeleton.className = `message-item skeleton-message ${isRight ? 'sent' : 'received'}`;
+            skeleton.innerHTML = `
+                <div class="message-content">
+                    <div class="message-bubble ${isRight ? 'sent' : 'received'}" 
+                         style="background-color: #f0f0f0; width: ${70 + Math.random() * 100}px; height: 30px; animation: pulse 1.5s infinite;">
+                    </div>
+                    <div class="message-time" style="width: 50px; height: 12px; background-color: #f0f0f0; margin-top: 5px; border-radius: 3px; animation: pulse 1.5s infinite;"></div>
+                </div>
+            `;
+            messageList.appendChild(skeleton);
+        }
+    }
+    
+    // 移除消息骨架屏
+    function removeMessageSkeletons() {
+        document.querySelectorAll('.skeleton-message').forEach(skeleton => {
+            skeleton.remove();
+        });
     }
     
     // 关闭聊天
@@ -1005,21 +1413,43 @@
         }, 5000);
     }
     
+    // 更新连接状态UI
+    function updateConnectionStatusUI(status) {
+        // 移除所有状态类
+        connectionStatus.classList.remove('connecting', 'connected', 'disconnected');
+        
+        // 只在连接中状态时显示提示
+        if (status === 'connecting') {
+            connectionStatus.classList.add(status);
+            connectionStatus.classList.add('show');
+            
+            // 更新文本
+            const statusText = connectionStatus.querySelector('.connection-text');
+            statusText.textContent = '正在连接...';
+        } else {
+            // 连接成功或断开连接时，隐藏提示
+            connectionStatus.classList.remove('show');
+        }
+    }
+    
     // 更新连接状态
     function updateConnectionStatus(status) {
         switch(status) {
             case 'connecting':
                 sendButton.disabled = true;
                 messageInput.disabled = true;
+                updateConnectionStatusUI('connecting');
                 break;
             case 'connected':
                 sendButton.disabled = false;
                 messageInput.disabled = false;
+                updateConnectionStatusUI('connected');
                 break;
             case 'disconnected':
             case 'closed':
                 sendButton.disabled = true;
                 messageInput.disabled = true;
+                updateConnectionStatusUI('disconnected');
                 break;
         }
     }
@@ -1196,86 +1626,28 @@
     
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
-        // 提交表单发送消息
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            sendMessage(messageInput.value);
-        });
+        console.log('页面加载完成，初始化聊天功能');
         
-        // 按Enter键发送消息
-        messageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        // 提交表单发送消息
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 sendMessage(messageInput.value);
-            }
-        });
+            });
+        }
+
+        // 按Enter键发送消息
+        if (messageInput) {
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(messageInput.value);
+                }
+            });
+        }
         
-        // 创建群组按钮点击事件
-        document.getElementById('create-group-btn').addEventListener('click', function() {
-            const groupName = document.getElementById('group-name').value.trim();
-            const groupDescription = document.getElementById('group-description').value.trim();
-            
-            if (!groupName) {
-                alert('请输入群组名称');
-                return;
-            }
-            
-            // 获取选中的用户
-            const selectedUsers = [];
-            document.querySelectorAll('.user-selection input:checked').forEach(function(checkbox) {
-                selectedUsers.push(checkbox.value);
-            });
-            
-            // 获取CSRF令牌
-            const csrfToken = '{{ csrf_token }}';
-            
-            // 禁用按钮并显示加载状态
-            const createGroupBtn = document.getElementById('create-group-btn');
-            createGroupBtn.disabled = true;
-            createGroupBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 创建中...';
-            
-            // 准备请求数据
-            const requestData = {
-                name: groupName,
-                description: groupDescription,
-                participants: selectedUsers
-            };
-            
-            // 发送请求创建群组
-            fetch('{% url "chat:create_group_chat" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify(requestData),
-                credentials: 'same-origin'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP错误 ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    // 关闭模态框
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('createGroupModal'));
-                    modal.hide();
-                    
-                    // 刷新页面加载新群组
-                    window.location.reload();
-                } else {
-                    throw new Error(data.message || '创建群组失败');
-                }
-            })
-            .catch(error => {
-                console.error('创建群组出错:', error);
-                createGroupBtn.disabled = false;
-                createGroupBtn.innerHTML = '创建群组';
-                alert('创建群组失败: ' + error.message);
-            });
-        });
+        // 修复布局问题
+        fixLayoutOnLoad();
         
         // 在移动设备上初始化
         if (isMobileView) {
@@ -1285,6 +1657,27 @@
             showContactList();
         }
     });
+    
+    // 修复布局问题的函数
+    function fixLayoutOnLoad() {
+        // 确保联系人列表在移动端正常显示
+        if (isMobileView) {
+            const sidebar = document.getElementById('chat-sidebar');
+            if (sidebar) {
+                sidebar.style.width = '100%';
+                sidebar.style.margin = '0 auto';
+            }
+        }
+        
+        // 检查群组头像是否正常显示
+        document.querySelectorAll('.chat-avatar img').forEach(img => {
+            img.onerror = function() {
+                // 如果图片加载失败，使用默认的UI Avatars
+                const altText = this.alt || 'Group';
+                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(altText)}&size=150&background=3498db&color=fff`;
+            };
+        });
+    }
     
     // 添加开始私聊的函数
     function startPrivateChat(userId) {
@@ -1364,6 +1757,58 @@
         if (chatSocket) {
             chatSocket.close(1000, '用户离开页面');
         }
+    });
+
+    // 执行刷新操作
+    function performRefresh() {
+        if (isRefreshing || !activeRoomId) return;
+        
+        isRefreshing = true;
+        
+        // 更新刷新指示器状态，确保可见
+        if (refreshIndicator) {
+            refreshIndicator.style.visibility = 'visible';
+            refreshIndicator.style.transform = 'translateY(0)';
+            const refreshText = refreshIndicator.querySelector('.refresh-text');
+            if (refreshText) {
+                refreshText.textContent = '刷新中...';
+            }
+        }
+        
+        // 重新加载当前聊天记录
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'reload_history'
+            }));
+            
+            // 模拟延迟，给用户视觉反馈
+            setTimeout(() => {
+                finishRefresh();
+            }, 1000);
+        } else {
+            // 如果WebSocket未连接，尝试重连
+            connectWebSocket(activeRoomId);
+            setTimeout(() => {
+                finishRefresh();
+            }, 1500);
+        }
+    }
+
+    // 修复聊天列表在桌面模式下的显示
+    function fixChatListDisplay() {
+        // 检查是否是桌面模式
+        if (window.innerWidth >= 768) {
+            // 在桌面模式下确保所有聊天列表项目都显示
+            document.querySelectorAll('.room-item').forEach(item => {
+                item.style.display = 'flex';
+            });
+        }
+    }
+
+    // 添加窗口大小变化监听器
+    window.addEventListener('resize', function() {
+        // 在每次窗口大小变化时检查并修复聊天列表显示
+        fixChatListDisplay();
     });
 </script>
 {% endblock %} 

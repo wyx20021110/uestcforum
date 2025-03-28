@@ -3,12 +3,14 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 
 User = get_user_model()
 
 class ResourceCategory(models.Model):
     """资源分类"""
     name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -18,6 +20,22 @@ class ResourceCategory(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        # 确保slug不为空，如果为空则使用name生成
+        if not self.slug:
+            # 如果用相同name生成的slug已存在，添加时间戳确保唯一性
+            base_slug = slugify(self.name)
+            if base_slug == '':
+                base_slug = 'category'
+            
+            if ResourceCategory.objects.filter(slug=base_slug).exists():
+                import time
+                self.slug = f"{base_slug}-{int(time.time())}"
+            else:
+                self.slug = base_slug
+                
+        super().save(*args, **kwargs)
 
 class Resource(models.Model):
     """教学资源"""

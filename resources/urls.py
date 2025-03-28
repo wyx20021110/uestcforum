@@ -13,6 +13,10 @@ urlpatterns = [
     path('<int:pk>/download/', views.resource_download, name='resource_download'),
     path('<int:pk>/like/', views.resource_like, name='resource_like'),
     
+    # 分类相关
+    path('category/<slug:slug>/', views.ResourceListView.as_view(), name='resource_list_by_category'),
+    path('uploader/<str:username>/', views.ResourceListView.as_view(), name='resource_list_by_uploader'),
+    
     # 评论相关
     path('<int:pk>/comment/', views.comment_create, name='comment_create'),
     path('comments/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment_edit'),

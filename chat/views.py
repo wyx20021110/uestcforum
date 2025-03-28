@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Max, F, Value, CharField
 from django.db.models.functions import Concat
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from .models import ChatRoom, Message
 from django.views.decorators.http import require_POST
 import json
@@ -26,36 +27,28 @@ def index(request):
         last_message=Max('messages__content')
     ).order_by('-last_message_time')
     
+    # 遍历聊天室，为每个私聊添加其他参与者信息
+    for room in chat_rooms:
+        if room.is_private and room.participants.count() == 2:
+            room.other_participant = room.participants.exclude(id=request.user.id).first()
+    
     # 查找可以聊天的用户（比如同班同学、老师等，这里简化为所有用户）
     available_users = User.objects.exclude(id=request.user.id)
     
+    # 获取所有用户的头像信息用于WebSocket通信
+    user_avatars = {}
+    all_users = User.objects.all()
+    for user in all_users:
+        if user.avatar:
+            user_avatars[user.username] = user.avatar.url
+    
     context = {
         'chat_rooms': chat_rooms,
-        'available_users': available_users
+        'available_users': available_users,
+        'user_avatars': json.dumps(user_avatars)
     }
     
     return render(request, 'chat/index.html', context)
-
-@login_required
-def room(request, room_id):
-    """聊天室界面"""
-    room = get_object_or_404(ChatRoom, id=room_id)
-    
-    # 检查用户是否有权限访问
-    if request.user not in room.participants.all():
-        return redirect('chat:index')
-    
-    # 获取聊天对象（在私聊情况下）
-    chat_with = None
-    if room.is_private and room.participants.count() == 2:
-        chat_with = room.participants.exclude(id=request.user.id).first()
-    
-    context = {
-        'room': room,
-        'chat_with': chat_with
-    }
-    
-    return render(request, 'chat/room.html', context)
 
 @login_required
 def api_room_detail(request, room_id):
@@ -262,7 +255,7 @@ def create_room(request):
     room.participants.add(request.user)
     
     messages.success(request, f'聊天室 "{room_name}" 创建成功')
-    return redirect('chat:room', room_id=room.id)
+    return HttpResponseRedirect(reverse('chat:index') + f'?room={room.id}')
 
 @login_required
 @require_POST
@@ -304,7 +297,7 @@ def start_private_chat(request):
                 sender=request.user,
                 content=initial_message.strip()
             )
-        return redirect('chat:room', room_id=existing_room.id)
+        return HttpResponseRedirect(reverse('chat:index') + f'?room={existing_room.id}')
     
     # 创建新的私聊
     room_name = f"{request.user.username} & {other_user.username}"
@@ -322,4 +315,4 @@ def start_private_chat(request):
             content=initial_message.strip()
         )
     
-    return redirect('chat:room', room_id=room.id)
+    return HttpResponseRedirect(reverse('chat:index') + f'?room={room.id}')

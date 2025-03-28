@@ -297,8 +297,8 @@
     <div class="container">
         <h1 class="mb-3">教学资源中心</h1>
         <p class="lead">发现和分享高质量的学习资源，帮助你更好地学习和成长。</p>
-        {% if user.is_authenticated and user.role == 'T' %}
-        <a href="{% url 'resources:resource_upload' %}" class="btn upload-btn mt-3 animate__animated animate__fadeInUp animate__delay-1s">
+        {% if user.is_authenticated and user.is_teacher %}
+        <a href="{% url 'resources:resource_create' %}" class="btn upload-btn mt-3 animate__animated animate__fadeInUp animate__delay-1s">
             <i class="fas fa-upload"></i> 上传资源
         </a>
         {% endif %}
@@ -331,10 +331,17 @@
                             <span class="badge bg-light text-dark float-end">{{ resource_count }}</span>
                         </a>
                         {% for cat in categories %}
+                        {% if cat.slug %}
                         <a href="{% url 'resources:resource_list_by_category' cat.slug %}" class="category-link {% if category.slug == cat.slug %}active{% endif %}">
                             {{ cat.name }}
                             <span class="badge bg-light text-dark float-end">{{ cat.resources.count }}</span>
                         </a>
+                        {% else %}
+                        <a href="{% url 'resources:resource_list' %}" class="category-link">
+                            {{ cat.name }}
+                            <span class="badge bg-light text-dark float-end">{{ cat.resources.count }}</span>
+                        </a>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>

@@ -114,7 +114,7 @@ def user_profile_view(request, user_id):
     user_posts = paginator.get_page(page)
     
     context = {
-        'user': profile_user,
+        'profile_user': profile_user,
         'user_posts': user_posts,
         'is_own_profile': request.user.id == profile_user.id if request.user.is_authenticated else False
     }

@@ -227,3 +227,7 @@ LOGGING = {
         },
     },
 }
+
+# 认证设置
+LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = '/'
