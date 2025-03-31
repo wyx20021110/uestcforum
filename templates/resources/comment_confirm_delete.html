@@ -224,7 +224,11 @@
             <!-- 评论信息 -->
             <div class="comment-info animate__animated animate__fadeInUp">
                 <div class="comment-author">
-                    <img src="{{ comment.user.profile.avatar.url|default:'/static/images/default-avatar.png' }}" alt="用户头像" class="user-avatar">
+                    {% if comment.user.profile and comment.user.profile.avatar and comment.user.profile.avatar.name %}
+                    <img src="{{ comment.user.profile.avatar.url }}" alt="用户头像" class="user-avatar">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ comment.user.username }}&size=150&background=random" alt="用户头像" class="user-avatar">
+                    {% endif %}
                     <div>
                         <div class="author-name">{{ comment.user.get_full_name|default:comment.user.username }}</div>
                         <div class="rating">

@@ -176,10 +176,10 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        {% if profile_user.avatar %}
+                        {% if profile_user.avatar and profile_user.avatar.name %}
                             <img src="{{ profile_user.avatar.url }}" alt="用户头像" class="rounded-circle user-avatar">
                         {% else %}
-                            <img src="https://ui-avatars.com/api/?name={{ profile_user.username }}&size=150&background=random" alt="默认头像" class="rounded-circle user-avatar">
+                            <img src="https://ui-avatars.com/api/?name={{ profile_user.username }}&size=150&background=random" alt="用户头像" class="rounded-circle user-avatar">
                         {% endif %}
                     </div>
                     <h4 class="card-title">{{ profile_user.username }}</h4>
@@ -256,10 +256,10 @@
                     <div class="card-body">
                         <div class="d-flex mb-3">
                             <div class="avatar me-3">
-                                {% if post.author.avatar %}
+                                {% if post.author.avatar and post.author.avatar.name %}
                                     <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
                                 {% else %}
-                                    <i class="fas fa-user-circle fa-lg"></i>
+                                    <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=150&background=random" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
                                 {% endif %}
                             </div>
                             <div>

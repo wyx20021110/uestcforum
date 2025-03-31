@@ -39,8 +39,10 @@ def index(request):
     user_avatars = {}
     all_users = User.objects.all()
     for user in all_users:
-        if user.avatar:
+        if user.avatar and hasattr(user.avatar, 'url'):
             user_avatars[user.username] = user.avatar.url
+        else:
+            user_avatars[user.username] = f"https://ui-avatars.com/api/?name={user.username}&size=150&background=random"
     
     context = {
         'chat_rooms': chat_rooms,

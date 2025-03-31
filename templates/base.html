@@ -156,7 +156,7 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {% if user.avatar %}
+                                {% if user.avatar and user.avatar.name %}
                                     <div style="width: 28px; height: 28px; overflow: hidden; border-radius: 50%; margin-right: 0.5rem;">
                                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
                                     </div>

@@ -411,7 +411,7 @@
                     <div class="comment-item animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter }}00ms">
                         <div class="d-flex">
                             <div class="me-3">
-                                {% if comment.author.avatar %}
+                                {% if comment.author.avatar and comment.author.avatar.name %}
                                 <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="comment-avatar">
                                 {% else %}
                                 <img src="https://ui-avatars.com/api/?name={{ comment.author.username }}&background=random" alt="{{ comment.author.username }}" class="comment-avatar">
@@ -458,7 +458,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        {% if resource.uploader.avatar %}
+                        {% if resource.uploader.avatar and resource.uploader.avatar.name %}
                         <img src="{{ resource.uploader.avatar.url }}" alt="{{ resource.uploader.username }}" class="uploader-avatar">
                         {% else %}
                         <img src="https://ui-avatars.com/api/?name={{ resource.uploader.username }}&background=random" alt="{{ resource.uploader.username }}" class="uploader-avatar">

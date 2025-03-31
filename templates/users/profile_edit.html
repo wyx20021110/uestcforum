@@ -108,13 +108,11 @@
                                 <i class="fas fa-camera me-2"></i>头像设置
                             </h5>
                             <div class="text-center">
-                                <div class="avatar-preview" id="avatar-preview">
-                                    {% if user.avatar %}
-                                        <img src="{{ user.avatar.url }}" alt="当前头像" id="avatar-img">
+                                <div class="avatar-preview mb-3">
+                                    {% if user.avatar and user.avatar.name %}
+                                    <img src="{{ user.avatar.url }}" alt="当前头像" id="avatar-img">
                                     {% else %}
-                                        <div class="avatar-preview-default">
-                                            <i class="fas fa-user-circle"></i>
-                                        </div>
+                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="当前头像" id="avatar-img">
                                     {% endif %}
                                 </div>
                                 
