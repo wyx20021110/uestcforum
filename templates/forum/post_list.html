@@ -292,24 +292,22 @@
                 <div class="d-flex mb-3">
                     {% if post.author %}
                     <a href="{% url 'users:user_profile' post.author.id %}" class="me-3" style="text-decoration: none;">
-                        <div class="post-author d-flex align-items-center mb-3">
-                            <div class="avatar me-2">
-                                {% if post.author.avatar and post.author.avatar.name %}
-                                <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
-                                {% else %}
-                                <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=150&background=random" alt="{{ post.author.username }}" class="w-100 h-100">
-                                {% endif %}
-                            </div>
-                            <div>
-                                <h5 class="post-author mb-0">
-                                    <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
-                                        {{ post.author.username }}
-                                    </a>
-                                </h5>
-                                <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
-                            </div>
+                        <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
+                            {% if post.author.avatar and post.author.avatar.name %}
+                            <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" class="w-100 h-100">
+                            {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=150&background=random" alt="{{ post.author.username }}" class="w-100 h-100 rounded-circle">
+                            {% endif %}
                         </div>
                     </a>
+                    <div>
+                        <h5 class="post-author mb-0">
+                            <a href="{% url 'users:user_profile' post.author.id %}" class="text-decoration-none text-dark">
+                                {{ post.author.username }}
+                            </a>
+                        </h5>
+                        <small class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
                     {% else %}
                     <div class="me-3">
                         <div style="width: 48px; height: 48px; overflow: hidden; border-radius: 50%;">
@@ -392,13 +390,11 @@
                             {% csrf_token %}
                             <div class="d-flex">
                                 <div style="width: 36px; height: 36px; overflow: hidden; border-radius: 50%;" class="me-2">
-                                    <div class="avatar me-2">
-                                        {% if user.avatar and user.avatar.name %}
-                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
-                                        {% else %}
-                                        <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="{{ user.username }}" class="w-100 h-100">
-                                        {% endif %}
-                                    </div>
+                                    {% if user.avatar and user.avatar.name %}
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-100 h-100">
+                                    {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random" alt="{{ user.username }}" class="w-100 h-100 rounded-circle">
+                                    {% endif %}
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="input-group">
@@ -419,11 +415,11 @@
                                 <div class="d-flex">
                                     {% if comment.author %}
                                     <a href="{% url 'users:user_profile' comment.author.id %}" class="me-2" style="text-decoration: none;">
-                                        <div class="avatar me-2">
+                                        <div style="width: 32px; height: 32px; overflow: hidden; border-radius: 50%;">
                                             {% if comment.author.avatar and comment.author.avatar.name %}
                                             <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.username }}" class="w-100 h-100">
                                             {% else %}
-                                            <img src="https://ui-avatars.com/api/?name={{ comment.author.username }}&size=150&background=random" alt="{{ comment.author.username }}" class="w-100 h-100">
+                                            <img src="https://ui-avatars.com/api/?name={{ comment.author.username }}&size=150&background=random" alt="{{ comment.author.username }}" class="w-100 h-100 rounded-circle">
                                             {% endif %}
                                         </div>
                                     </a>
